@@ -6,8 +6,7 @@
                     <div class="col-xl-8 col-lg-8 col-md-7">
                         <div class="wantToWork-caption wantToWork-caption2">
                             <img src="assets/img/logo/new_logo.png" alt="" class="mb-20">
-                            <p>Users and submit their own items. You can create different packages and by connecting with your
-                                PayPal or Stripe account charge users for registration to your directory portal.</p>
+                            <p>Encontre mais informações úteis nas nossas redes sociais.</p>
                         </div>
                     </div>
                     <div class="col-xl-4 col-lg-4 col-md-5">
@@ -33,18 +32,15 @@
                             <div class="main-menu2">
                                 <nav>
                                     <ul>
-                                        <li><a href="index.html">Home</a></li>
-                                        <li><a href="explore.html">Explore</a></li> 
-                                        <li><a href="pages.html">Pages</a></li>
+                                        <li><a href="index.php">Home</a></li>
+                                        <li><a href="listning.php">Produtos</a></li> 
+                                        <li><a href="barcode/barcode.php">Scaner</a></li>
                                         <li><a href="blog.html">Blog</a></li>
-                                        <li><a href="contact.html">Contact</a></li>
+                                        <li><a href="contact.php">Contatos</a></li>
                                     </ul>
                                 </nav>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-xl-2 col-lg-3 col-md-4">
-                        <a href="#" class="btn f-right sm-left">Add Listing</a>
                     </div>
                 </div>
             </div>
@@ -62,7 +58,7 @@
                             <div class="col-xl-10 col-lg-9 ">
                                 <div class="footer-copy-right">
                                     <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved</a>
   <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p>
                                 </div>
                             </div>

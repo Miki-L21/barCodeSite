@@ -14,27 +14,15 @@
                                 <ul id="navigation">
                                     <li><a href="index.php">Home</a></li>
                                     <li><a href="listing.php">Produtos</a></li> 
-                                    <li><a href="#">Pages</a>
-                                        <ul class="submenu">
-                                            <li><a href="directory_details.php">listing Details</a></li>
-                                            <li><a href="listing.php">Catagories</a></li> 
-                                        </ul>
-                                    </li>
-                                    <li><a href="blog.php">Blog</a>
-                                        <ul class="submenu">
-                                            <li><a href="blog.php">Blog</a></li>
-                                            <li><a href="blog_details.php">Blog Details</a></li>
-                                            <li><a href="elements.php">Elements</a></li>
-                                        </ul>
-                                    </li>
+                                    <li><a href="barcode/barcode.php">Scaner</a></li>
                                     <li><a href="contact.php">Contactos</a></li>
                                 </ul>
                             </nav>
                         </div>          
                         <!-- Header-btn -->
                         <div class="header-btns d-none d-lg-block f-right">
-                            <a href="login/login.html" class="mr-40"><i class="ti-user"></i> Log in</a>
-                            <a href="#" class="btn">Ver carrinho</a>
+                            <a href="login/login.php" class="mr-40"><i class="ti-user"></i> Log in</a>
+                            <a href="blog.php" class="btn">Ver carrinho</a>
                         </div>
                         <!-- Mobile Menu -->
                         <div class="col-12">

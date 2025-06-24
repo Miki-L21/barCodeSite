@@ -73,7 +73,7 @@
                             </form>	
                             <!-- hero category1 img -->
                             <div class="category-img text-center">
-                                <a href="listing.html"> <img src="assets/img/scanear.png" alt=""></a>
+                                <a href="barcode/barcode.html"> <img src="assets/img/scanear.png" alt=""></a>
                             </div>
                         </div>
                     </div>
@@ -81,207 +81,6 @@
             </div>
         </div>
         <!--Hero Area End-->
-        <!--? Popular Locations Start 01-->
-        <div class="popular-location border-bottom section-padding40">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <!-- Section Tittle -->
-                        <div class="section-tittle text-center mb-80">
-                            <h2>Explore top cities</h2>
-                            <p>Let's uncover the best places to eat, drink, and shop nearest to you.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-6 col-md-6 col-sm-6">
-                        <div class="single-location mb-30">
-                            <div class="location-img">
-                                <img src="assets/img/gallery/location1.png" alt="">
-                            </div>
-                            <div class="location-details">
-                                <p>New York</p>
-                                <a href="#" class="location-btn">65 <i class="ti-plus"></i> Listing</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-6">
-                        <div class="single-location mb-30">
-                            <div class="location-img">
-                                <img src="assets/img/gallery/location2.png" alt="">
-                            </div>
-                            <div class="location-details">
-                                <p>Paris</p>
-                                <a href="#" class="location-btn">60 <i class="ti-plus"></i> Listing</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-6">
-                        <div class="single-location mb-30">
-                            <div class="location-img">
-                                <img src="assets/img/gallery/location3.png" alt="">
-                            </div>
-                            <div class="location-details">
-                                <p>Rome</p>
-                                <a href="#" class="location-btn">50 <i class="ti-plus"></i> Listing</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-6">
-                        <div class="single-location mb-30">
-                            <div class="location-img">
-                                <img src="assets/img/gallery/location4.png" alt="">
-                            </div>
-                            <div class="location-details">
-                                <p>Italy</p>
-                                <a href="#" class="location-btn">28 <i class="ti-plus"></i> Location</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-6">
-                        <div class="single-location mb-30">
-                            <div class="location-img">
-                                <img src="assets/img/gallery/location5.png" alt="">
-                            </div>
-                            <div class="location-details">
-                                <p>Nepal</p>
-                                <a href="#" class="location-btn">99 <i class="ti-plus"></i> Listing</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Popular Locations End -->
-        <!--? Popular Directory Start -->
-        <div class="popular-directorya-area  border-bottom section-padding40 fix">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <!-- Section Tittle -->
-                        <div class="section-tittle text-center mb-80">
-                            <h2>Popular Directory</h2>
-                            <p>Let's uncover the best places to eat, drink, and shop nearest to you.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="directory-active">
-                    <!-- Single -->
-                    <div class="properties pb-20">
-                        <div class="properties__card">
-                            <div class="properties__img overlay1">
-                                <a href="#"><img src="assets/img/gallery/properties1.png" alt=""></a>
-                                <div class="img-text">
-                                    <span>$$$</span>
-                                    <span>Closed</span>
-                                </div>
-                                <div class="icon">
-                                    <img src="assets/img/gallery/categori_icon1.png" alt=""> 
-                                </div>
-                            </div>
-                            <div class="properties__caption">
-                                <h3><a href="#">Urban areas</a></h3>
-                                <p>Let's uncover the best places to eat, drink</p>
-                            </div>
-                            <div class="properties__footer d-flex justify-content-between align-items-center">
-                                <div class="restaurant-name">
-                                    <img src="assets/img/gallery/restaurant-icon.png" alt="">
-                                    <h3>Food & Restaurant</h3>
-                                </div>
-                                <div class="heart">
-                                    <img src="assets/img/gallery/heart1.png" alt="">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Single -->
-                    <div class="properties pb-20">
-                        <div class="properties__card">
-                            <div class="properties__img overlay1">
-                                <a href="#"><img src="assets/img/gallery/properties2.png" alt=""></a>
-                                <div class="img-text">
-                                    <span>$$$</span>
-                                    <span>Closed</span>
-                                </div>
-                                <div class="icon">
-                                    <img src="assets/img/gallery/categori_icon1.png" alt=""> 
-                                </div>
-                            </div>
-                            <div class="properties__caption">
-                                <h3><a href="#">Urban areas</a></h3>
-                                <p>Let's uncover the best places to eat, drink</p>
-                            </div>
-                            <div class="properties__footer d-flex justify-content-between align-items-center">
-                                <div class="restaurant-name">
-                                    <img src="assets/img/gallery/restaurant-icon.png" alt="">
-                                    <h3>Food & Restaurant</h3>
-                                </div>
-                                <div class="heart">
-                                    <img src="assets/img/gallery/heart1.png" alt="">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Single -->
-                    <div class="properties pb-20">
-                        <div class="properties__card">
-                            <div class="properties__img overlay1">
-                                <a href="#"><img src="assets/img/gallery/properties3.png" alt=""></a>
-                                <div class="img-text">
-                                    <span>$$$</span>
-                                    <span>Closed</span>
-                                </div>
-                                <div class="icon">
-                                    <img src="assets/img/gallery/categori_icon1.png" alt=""> 
-                                </div>
-                            </div>
-                            <div class="properties__caption">
-                                <h3><a href="#">Urban areas</a></h3>
-                                <p>Let's uncover the best places to eat, drink</p>
-                            </div>
-                            <div class="properties__footer d-flex justify-content-between align-items-center">
-                                <div class="restaurant-name">
-                                    <img src="assets/img/gallery/restaurant-icon.png" alt="">
-                                    <h3>Food & Restaurant</h3>
-                                </div>
-                                <div class="heart">
-                                    <img src="assets/img/gallery/heart1.png" alt="">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Single -->
-                    <div class="properties pb-20">
-                        <div class="properties__card">
-                            <div class="properties__img overlay1">
-                                <a href="#"><img src="assets/img/gallery/properties3.png" alt=""></a>
-                                <div class="img-text">
-                                    <span>$$$</span>
-                                    <span>Closed</span>
-                                </div>
-                                <div class="icon">
-                                    <img src="assets/img/gallery/categori_icon1.png" alt=""> 
-                                </div>
-                            </div>
-                            <div class="properties__caption">
-                                <h3><a href="#">Urban areas</a></h3>
-                                <p>Let's uncover the best places to eat, drink</p>
-                            </div>
-                            <div class="properties__footer d-flex justify-content-between align-items-center">
-                                <div class="restaurant-name">
-                                    <img src="assets/img/gallery/restaurant-icon.png" alt="">
-                                    <h3>Food & Restaurant</h3>
-                                </div>
-                                <div class="heart">
-                                    <img src="assets/img/gallery/heart1.png" alt="">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--? Popular Directory End -->
         <!--? Want To work 01-->
         <section class="wantToWork-area">
             <div class="container">
@@ -289,12 +88,9 @@
                     <div class="row align-items-center justify-content-between">
                         <div class="col-xl-7 col-lg-9 col-md-8">
                             <div class="wantToWork-caption wantToWork-caption2">
-                                <h2>How it works</h2>
-                                <p>Let's uncover the best places to eat, drink, and shop nearest to you.</p>
+                                <h2>O que fazemos ?</h2>
+                                <p>A nossa intenção é ajudar a identificar e fazer a sua lista de compras através dos códigos de barra dos produtos.</p>
                             </div>
-                        </div>
-                        <div class="col-xl-2 col-lg-3 col-md-4">
-                            <a href="#" class="btn f-right sm-left">Explore Listing</a>
                         </div>
                     </div>
                 </div>
@@ -311,8 +107,8 @@
                                 <span>01</span>
                             </div>
                             <div class="services-cap">
-                                <h5><a href="#">Find Businesses</a></h5>
-                                <p>Discover & connect with great local businesses in your local neighborhood like dentists, hair stylists and more.</p>
+                                <h5>Utilidade</h5>
+                                <p>É bastante útil, porém pode conter alguma falta de informação, ou informação errada, caso isso aconteça envie esse erro para o nosso serviço de ajuda.</p>
                             </div>
                         </div>
                     </div>
@@ -322,8 +118,8 @@
                                 <span>02</span>
                             </div>
                             <div class="services-cap">
-                                <h5><a href="#">Review Listings</a></h5>
-                                <p>Discover & connect with great local businesses in your local neighborhood like dentists, hair stylists and more.</p>
+                                <h5>Desenvolvimento</h5>
+                                <p>O site encontra-se em mudanças, podendo ser melhorado futuramente.</p>
                             </div>
                         </div>
                     </div>
@@ -333,189 +129,16 @@
                                 <span>03</span>
                             </div>
                             <div class="services-cap">
-                                <h5><a href="#">Make a Reservation</a></h5>
-                                <p>Discover & connect with great local businesses in your local neighborhood like dentists, hair stylists and more.</p>
+                                <h5>Apoio</h5>
+                                <p>Pode contar com os nossos serviços de apoio.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </main>
         <!-- Our Services End -->
-        <!--? Popular Directory Start -->
-        <div class="popular-directorya-area section-padding40 border-bottom fix">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <!-- Section Tittle -->
-                        <div class="section-tittle text-center mb-80">
-                            <h2>New Directory</h2>
-                            <p>Let's uncover the best places to eat, drink, and shop nearest to you.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="directory-active">
-                    <!-- Single -->
-                    <div class="properties pb-20">
-                        <div class="properties__card">
-                            <div class="properties__img overlay1">
-                                <a href="#"><img src="assets/img/gallery/newDirectory1.png" alt=""></a>
-                                <div class="img-text">
-                                    <span>$$$</span>
-                                    <span>Closed</span>
-                                </div>
-                                <div class="icon">
-                                    <img src="assets/img/gallery/categori_icon1.png" alt=""> 
-                                </div>
-                            </div>
-                            <div class="properties__caption">
-                                <h3><a href="#">Urban areas</a></h3>
-                                <p>Let's uncover the best places to eat, drink</p>
-                            </div>
-                            <div class="properties__footer d-flex justify-content-between align-items-center">
-                                <div class="restaurant-name">
-                                    <img src="assets/img/gallery/restaurant-icon.png" alt="">
-                                    <h3>Food & Restaurant</h3>
-                                </div>
-                                <div class="heart">
-                                    <img src="assets/img/gallery/heart1.png" alt="">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Single -->
-                    <div class="properties pb-20">
-                        <div class="properties__card">
-                            <div class="properties__img overlay1">
-                                <a href="#"><img src="assets/img/gallery/newDirectory2.png" alt=""></a>
-                                <div class="img-text">
-                                    <span>$$$</span>
-                                    <span>Closed</span>
-                                </div>
-                                <div class="icon">
-                                    <img src="assets/img/gallery/categori_icon1.png" alt=""> 
-                                </div>
-                            </div>
-                            <div class="properties__caption">
-                                <h3><a href="#">Urban areas</a></h3>
-                                <p>Let's uncover the best places to eat, drink</p>
-                            </div>
-                            <div class="properties__footer d-flex justify-content-between align-items-center">
-                                <div class="restaurant-name">
-                                    <img src="assets/img/gallery/restaurant-icon.png" alt="">
-                                    <h3>Food & Restaurant</h3>
-                                </div>
-                                <div class="heart">
-                                    <img src="assets/img/gallery/heart1.png" alt="">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Single -->
-                    <div class="properties pb-20">
-                        <div class="properties__card">
-                            <div class="properties__img overlay1">
-                                <a href="#"><img src="assets/img/gallery/newDirectory3.png" alt=""></a>
-                                <div class="img-text">
-                                    <span>$$$</span>
-                                    <span>Closed</span>
-                                </div>
-                                <div class="icon">
-                                    <img src="assets/img/gallery/categori_icon1.png" alt=""> 
-                                </div>
-                            </div>
-                            <div class="properties__caption">
-                                <h3><a href="#">Urban areas</a></h3>
-                                <p>Let's uncover the best places to eat, drink</p>
-                            </div>
-                            <div class="properties__footer d-flex justify-content-between align-items-center">
-                                <div class="restaurant-name">
-                                    <img src="assets/img/gallery/restaurant-icon.png" alt="">
-                                    <h3>Food & Restaurant</h3>
-                                </div>
-                                <div class="heart">
-                                    <img src="assets/img/gallery/heart1.png" alt="">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Single -->
-                    <div class="properties pb-20">
-                        <div class="properties__card">
-                            <div class="properties__img overlay1">
-                                <a href="#"><img src="assets/img/gallery/properties1.png" alt=""></a>
-                                <div class="img-text">
-                                    <span>$$$</span>
-                                    <span>Closed</span>
-                                </div>
-                                <div class="icon">
-                                    <img src="assets/img/gallery/categori_icon1.png" alt=""> 
-                                </div>
-                            </div>
-                            <div class="properties__caption">
-                                <h3><a href="#">Urban areas</a></h3>
-                                <p>Let's uncover the best places to eat, drink</p>
-                            </div>
-                            <div class="properties__footer d-flex justify-content-between align-items-center">
-                                <div class="restaurant-name">
-                                    <img src="assets/img/gallery/restaurant-icon.png" alt="">
-                                    <h3>Food & Restaurant</h3>
-                                </div>
-                                <div class="heart">
-                                    <img src="assets/img/gallery/heart1.png" alt="">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Popular Directory End -->
-        <!--? Popular Locations Start 01-->
-        <div class="popular-location border-bottom section-padding40">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <!-- Section Tittle -->
-                        <div class="section-tittle text-center mb-80">
-                            <h2>News & Updates</h2>
-                            <p>Let's uncover the best places to eat, drink, and shop nearest to you.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-6 col-md-6 col-sm-12">
-                        <div class="single-location mb-30">
-                            <div class="location-img">
-                                <img src="assets/img/gallery/home-blog1.png" alt="">
-                            </div>
-                            <div class="location-details">
-                                <a href="#" class="location-btn">Tips</a>
-                                <ul>
-                                    <li>12 March   I   by Alan</li>
-                                </ul>
-                                <p><a href="blog_details.html">The Best SPA Salons For Your Relaxation</a></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-sm-12">
-                        <div class="single-location mb-30">
-                            <div class="location-img">
-                                <img src="assets/img/gallery/home-blog2.png" alt="">
-                            </div>
-                            <div class="location-details">
-                                <a href="#" class="location-btn">Tips</a>
-                                <ul>
-                                    <li>12 March   I   by Alan</li>
-                                </ul>
-                                <p><a href="blog_details.html">The Best SPA Salons For Your Relaxation</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Popular Locations End -->
         <?php include("rodape.php"); ?>
 
     <!-- Scroll Up -->
