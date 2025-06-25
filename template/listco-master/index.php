@@ -82,7 +82,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                             </form>	
                             <!-- hero category1 img -->
                             <div class="category-img text-center">
-                                <a href="barcode/barcode.html"> <img src="assets/img/scanear.png" alt=""></a>
+                                <a href="barcode.php"> <img src="assets/img/scanear.png" alt=""></a>
                             </div>
                         </div>
                     </div>

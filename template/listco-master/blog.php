@@ -162,7 +162,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                             <div class="col-md-8 text-center">
                                 <h3>Carrinho Vazio</h3>
                                 <p>Ainda não adicionou produtos ao carrinho.</p>
-                                <a href="barcode/barcode.php" class="btn btn-primary">Escanear Produtos</a>
+                                <a href="barcode.php" class="btn btn-primary">Escanear Produtos</a>
                             </div>
                         </div>
                     </div>
