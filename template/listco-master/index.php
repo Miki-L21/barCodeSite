@@ -57,29 +57,10 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                         <div class="col-xl-10 col-lg-10">
                             <!-- Hero Caption -->
                             <div class="hero__caption pt-100">
-                                <h1>Identifica o produto</h1>
-                                <p>Vê qual o produto que andas à procura e coloca-o no teu carrinho.</p>
-                            </div>
+                                <h1>Identifica o produto<br>e faz a tua lista</h1>
+                                <p>Faz scan do teu produto clicando no botão aqui embaixo, e adiciona-o na tua lista de compras.</p>
+                            </div> 
                             <!--Hero form -->
-                            <form action="#" class="search-box mb-100">
-                                <div class="input-form">
-                                    <input type="text" placeholder="Que produto estás à procura?">
-                                </div>
-                                <div class="select-form">
-                                    <div class="select-itms">
-                                        <select name="select" id="select1">
-                                            <option value="">Que secção?</option>
-                                            <option value="">Catagories One- Higiene</option>
-                                            <option value="">Catagories Two- Comida/Bebida</option>
-                                            <option value="">Catagories Three- Utensilios</option>
-                                            <option value="">Catagories Four- Outros</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="search-form">
-                                    <a href="#"><i class="ti-search"></i> Procurar</a>
-                                </div>	
-                            </form>	
                             <!-- hero category1 img -->
                             <div class="category-img text-center">
                                 <a href="barcode.php"> <img src="assets/img/scanear.png" alt=""></a>

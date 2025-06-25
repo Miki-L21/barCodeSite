@@ -5,6 +5,9 @@ use classes\authentication\Authentication;
 //Zona sem autenticação
 Route::get('/', function(){require _CAMINHO_TEMPLATE. "levar.php";});
 
+//MINHAS API
+Route::get(['set' => '/api/compras', 'as' => 'lista.getCompras'], 'ControllerLista@getCompras');
+
 Route::get(['set' => '/base/index', 'as' => 'base.index'], 'Controller@index'); 
 Route::get(['set' => '/base/show/{id}', 'as' => 'base.show'], 'Controller@show'); 
 

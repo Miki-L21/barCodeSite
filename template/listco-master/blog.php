@@ -31,6 +31,114 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/responsive.css">
     <link rel="stylesheet" href="stylesblock.css">
+    
+    <style>
+    /* Estilos para Lista de Compras */
+    .shopping-list-area {
+        background-color: #f8f9fa;
+    }
+
+    .shopping-list-wrapper {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .product-item {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .product-item:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .product-info h5 {
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .product-brand {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .product-code {
+        color: #999;
+        font-size: 0.8rem;
+    }
+
+    .product-price {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .quantity-controls .btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quantity-display {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 8px 15px;
+        min-width: 50px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .item-total {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .cart-summary {
+        border-top: 2px solid #e0e0e0;
+        padding-top: 20px;
+    }
+
+    .total-box {
+        border: 2px solid #28a745 !important;
+    }
+
+    .total-line {
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 5px;
+    }
+
+    .empty-cart-message {
+        padding: 60px 20px;
+    }
+
+    @media (max-width: 768px) {
+        .product-item .row > div {
+            margin-bottom: 15px;
+        }
+        
+        .cart-summary .row > div {
+            margin-bottom: 20px;
+        }
+    }
+    </style>
 </head>
 <body>
     <!--? Preloader Start -->
@@ -72,13 +180,13 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                     <i class="fas fa-user-plus"></i> Registar-se
                 </a>
             </div>
-            
-            
         </div>
     </div>
     <?php endif; ?>
+    
     <!-- Preloader Start -->
     <?php include("cabecalho.php"); ?>
+    
     <main>
         <!--? Hero Start -->
         <div class="slider-area2">
@@ -95,164 +203,232 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
             </div>
         </div>
         <!-- Hero End -->
-    </main>
-    
-    <?php include("rodape.php"); ?>
-    
 
-    <!-- Scroll Up -->
-    <div id="back-top" >
-        <a title="Go to Top" href="#"> <i class="fas fa-level-up-alt"></i></a>
-    </div>
-      <!-- JS here -->
-
-      <script src="./assets/js/vendor/modernizr-3.5.0.min.js"></script>
-      <!-- Jquery, Popper, Bootstrap -->
-      <script src="./assets/js/vendor/jquery-1.12.4.min.js"></script>
-      <script src="./assets/js/popper.min.js"></script>
-      <script src="./assets/js/bootstrap.min.js"></script>
-      <!-- Jquery Mobile Menu -->
-      <script src="./assets/js/jquery.slicknav.min.js"></script>
-
-      <!-- Jquery Slick , Owl-Carousel Plugins -->
-      <script src="./assets/js/owl.carousel.min.js"></script>
-      <script src="./assets/js/slick.min.js"></script>
-      <!-- One Page, Animated-HeadLin -->
-      <script src="./assets/js/wow.min.js"></script>
-      <script src="./assets/js/animated.headline.js"></script>
-      <script src="./assets/js/jquery.magnific-popup.js"></script>
-
-      <!-- Date Picker -->
-      <script src="./assets/js/gijgo.min.js"></script>
-      <!-- Nice-select, sticky -->
-      <script src="./assets/js/jquery.nice-select.min.js"></script>
-      <script src="./assets/js/jquery.sticky.js"></script>
-      
-      <!-- counter , waypoint,Hover Direction -->
-      <script src="./assets/js/jquery.counterup.min.js"></script>
-      <script src="./assets/js/waypoints.min.js"></script>
-      <script src="./assets/js/jquery.countdown.min.js"></script>
-      <script src="./assets/js/hover-direction-snake.min.js"></script>
-
-      <!-- contact js -->
-      <script src="./assets/js/contact.js"></script>
-      <script src="./assets/js/jquery.form.js"></script>
-      <script src="./assets/js/jquery.validate.min.js"></script>
-      <script src="./assets/js/mail-script.js"></script>
-      <script src="./assets/js/jquery.ajaxchimp.min.js"></script>
-      
-      <!-- Jquery Plugins, main Jquery -->	
-      <script src="./assets/js/plugins.js"></script>
-      <script src="./assets/js/main.js"></script>
-
-
-     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            displayCartItems();
-        });
-
-        function displayCartItems() {
-            const cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
-            
-            if (cart.length === 0) {
-                // Se não há container específico, pode criar um ou usar o main
-                document.querySelector('main').innerHTML += `
-                    <div class="container mt-5">
-                        <div class="row justify-content-center">
-                            <div class="col-md-8 text-center">
-                                <h3>Carrinho Vazio</h3>
-                                <p>Ainda não adicionou produtos ao carrinho.</p>
-                                <a href="barcode.php" class="btn btn-primary">Escanear Produtos</a>
-                            </div>
+        <!-- Lista de Compras -->
+        <section class="shopping-list-area section-padding">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="section-tittle text-center mb-55">
+                            <h2>Lista de Compras</h2>
+                            <p>Gerencie os seus produtos de forma organizada</p>
                         </div>
                     </div>
-                `;
-                return;
-            }
-            
-            let cartHTML = `
-                <div class="container mt-5">
-                    <div class="row">
-                        <div class="col-12">
-                            <h3>Produtos no Carrinho</h3>
-                            <div class="cart-items">
-            `;
-            
-            let total = 0;
-            cart.forEach((item, index) => {
-                const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.')) || 0;
-                const itemTotal = itemPrice * item.quantity;
-                total += itemTotal;
+                </div>
                 
-                cartHTML += `
-                    <div class="cart-item card mb-3">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-6">
-                                    <h5>${item.name}</h5>
-                                    <p class="text-muted">Marca: ${item.brand}</p>
-                                    <small>Código: ${item.barcode}</small>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="shopping-list-wrapper">
+                            <!-- Carrinho Vazio -->
+                            <div id="empty-cart" class="empty-cart-message text-center" style="display: none;">
+                                <div class="empty-cart-icon mb-4">
+                                    <i class="fas fa-shopping-cart" style="font-size: 4rem; color: #ddd;"></i>
                                 </div>
-                                <div class="col-md-2">
-                                    <span class="price">${item.price}</span>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="quantity-controls">
-                                        <button onclick="updateQuantity(${index}, -1)" class="btn btn-sm btn-outline-secondary">-</button>
-                                        <span class="mx-2">${item.quantity}</span>
-                                        <button onclick="updateQuantity(${index}, 1)" class="btn btn-sm btn-outline-secondary">+</button>
+                                <h4>Carrinho Vazio</h4>
+                                <p class="text-muted mb-4">Ainda não adicionou produtos ao carrinho.</p>
+                                <a href="barcode.php" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-barcode"></i> Escanear Produtos
+                                </a>
+                            </div>
+                            
+                            <!-- Lista de Produtos -->
+                            <div id="cart-items" style="display: none;">
+                                <div class="cart-header mb-4">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            <h4><i class="fas fa-list"></i> Produtos no Carrinho</h4>
+                                        </div>
+                                        <div class="col-md-6 text-right">
+                                            <button onclick="clearCart()" class="btn btn-outline-danger">
+                                                <i class="fas fa-trash"></i> Limpar Carrinho
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <strong>€${itemTotal.toFixed(2)}</strong>
-                                    <br>
-                                    <button onclick="removeItem(${index})" class="btn btn-sm btn-danger mt-1">Remover</button>
+                                
+                                <div id="products-list" class="products-list">
+                                    <!-- Os produtos serão inseridos aqui dinamicamente -->
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            cartHTML += `
-                            </div>
-                            <div class="cart-total mt-4 p-3 bg-light">
-                                <h4>Total: €${total.toFixed(2)}</h4>
-                                <button class="btn btn-success btn-lg mt-2">Finalizar Compra</button>
-                                <button onclick="clearCart()" class="btn btn-warning btn-lg mt-2 ml-2">Limpar Carrinho</button>
+                                
+                                <!-- Total e Ações -->
+                                <div class="cart-summary mt-4">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="cart-actions">
+                                                <a href="barcode.php" class="btn btn-outline-primary">
+                                                    <i class="fas fa-plus"></i> Adicionar Mais Produtos
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="total-section">
+                                                <div class="total-box p-4 bg-light border rounded">
+                                                    <h5 class="mb-3">Resumo do Pedido</h5>
+                                                    <div class="total-line d-flex justify-content-between mb-2">
+                                                        <span>Subtotal:</span>
+                                                        <span id="subtotal">€0.00</span>
+                                                    </div>
+                                                    <div class="total-line d-flex justify-content-between mb-3">
+                                                        <strong>Total:</strong>
+                                                        <strong id="total-amount">€0.00</strong>
+                                                    </div>
+                                                    <button class="btn btn-success btn-block btn-lg">
+                                                        <i class="fas fa-credit-card"></i> Finalizar Compra
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
+    </main>
+    
+    <?php include("rodape.php"); ?>
+    
+    <!-- Scroll Up -->
+    <div id="back-top" >
+        <a title="Go to Top" href="#"> <i class="fas fa-level-up-alt"></i></a>
+    </div>
+    
+    <!-- JS here -->
+    <script src="./assets/js/vendor/modernizr-3.5.0.min.js"></script>
+    <!-- Jquery, Popper, Bootstrap -->
+    <script src="./assets/js/vendor/jquery-1.12.4.min.js"></script>
+    <script src="./assets/js/popper.min.js"></script>
+    <script src="./assets/js/bootstrap.min.js"></script>
+    <!-- Jquery Mobile Menu -->
+    <script src="./assets/js/jquery.slicknav.min.js"></script>
+
+    <!-- Jquery Slick , Owl-Carousel Plugins -->
+    <script src="./assets/js/owl.carousel.min.js"></script>
+    <script src="./assets/js/slick.min.js"></script>
+    <!-- One Page, Animated-HeadLin -->
+    <script src="./assets/js/wow.min.js"></script>
+    <script src="./assets/js/animated.headline.js"></script>
+    <script src="./assets/js/jquery.magnific-popup.js"></script>
+
+    <!-- Date Picker -->
+    <script src="./assets/js/gijgo.min.js"></script>
+    <!-- Nice-select, sticky -->
+    <script src="./assets/js/jquery.nice-select.min.js"></script>
+    <script src="./assets/js/jquery.sticky.js"></script>
+    
+    <!-- counter , waypoint,Hover Direction -->
+    <script src="./assets/js/jquery.counterup.min.js"></script>
+    <script src="./assets/js/waypoints.min.js"></script>
+    <script src="./assets/js/jquery.countdown.min.js"></script>
+    <script src="./assets/js/hover-direction-snake.min.js"></script>
+
+    <!-- contact js -->
+    <script src="./assets/js/contact.js"></script>
+    <script src="./assets/js/jquery.form.js"></script>
+    <script src="./assets/js/jquery.validate.min.js"></script>
+    <script src="./assets/js/mail-script.js"></script>
+    <script src="./assets/js/jquery.ajaxchimp.min.js"></script>
+    
+    <!-- Jquery Plugins, main Jquery -->	
+    <script src="./assets/js/plugins.js"></script>
+    <script src="./assets/js/main.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        displayCartItems();
+    });
+
+    function displayCartItems() {
+        const cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+        const emptyCart = document.getElementById('empty-cart');
+        const cartItems = document.getElementById('cart-items');
+        const productsList = document.getElementById('products-list');
+        
+        if (cart.length === 0) {
+            emptyCart.style.display = 'block';
+            cartItems.style.display = 'none';
+            return;
+        }
+        
+        emptyCart.style.display = 'none';
+        cartItems.style.display = 'block';
+        
+        let productsHTML = '';
+        let total = 0;
+        
+        cart.forEach((item, index) => {
+            const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.')) || 0;
+            const itemTotal = itemPrice * item.quantity;
+            total += itemTotal;
+            
+            productsHTML += `
+                <div class="product-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-5">
+                            <div class="product-info">
+                                <h5>${item.name}</h5>
+                                <p class="product-brand mb-1">Marca: ${item.brand}</p>
+                                <small class="product-code">Código: ${item.barcode}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="product-price">${item.price}</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="quantity-controls">
+                                <button onclick="updateQuantity(${index}, -1)" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <div class="quantity-display">${item.quantity}</div>
+                                <button onclick="updateQuantity(${index}, 1)" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="item-total mb-2">€${itemTotal.toFixed(2)}</div>
+                            <button onclick="removeItem(${index})" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             `;
-            
-            document.querySelector('main').innerHTML += cartHTML;
-        }
+        });
+        
+        productsList.innerHTML = productsHTML;
+        document.getElementById('subtotal').textContent = `€${total.toFixed(2)}`;
+        document.getElementById('total-amount').textContent = `€${total.toFixed(2)}`;
+    }
 
-        function updateQuantity(index, change) {
-            let cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
-            cart[index].quantity += change;
-            
-            if (cart[index].quantity <= 0) {
-                cart.splice(index, 1);
-            }
-            
-            localStorage.setItem('shopping_cart', JSON.stringify(cart));
-            location.reload(); // Recarregar página para atualizar
-        }
-
-        function removeItem(index) {
-            let cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+    function updateQuantity(index, change) {
+        let cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+        cart[index].quantity += change;
+        
+        if (cart[index].quantity <= 0) {
             cart.splice(index, 1);
-            localStorage.setItem('shopping_cart', JSON.stringify(cart));
-            location.reload();
         }
+        
+        localStorage.setItem('shopping_cart', JSON.stringify(cart));
+        displayCartItems();
+    }
 
-        function clearCart() {
+    function removeItem(index) {
+        let cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+        cart.splice(index, 1);
+        localStorage.setItem('shopping_cart', JSON.stringify(cart));
+        displayCartItems();
+    }
+
+    function clearCart() {
+        if (confirm('Tem certeza que deseja limpar o carrinho?')) {
             localStorage.removeItem('shopping_cart');
-            location.reload();
+            displayCartItems();
         }
-        </script>
+    }
+    </script>
 
-    </body>
+</body>
 </html>
