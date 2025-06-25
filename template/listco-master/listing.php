@@ -1,3 +1,11 @@
+
+<?php
+session_start();
+
+// Verificar se o utilizador está logado
+$is_logged_in = isset($_SESSION['logged_in']) && $_SESSION['logged_in'];
+$user_email = $is_logged_in ? $_SESSION['user_email'] : '';
+?>
 <!doctype html>
 <html class="no-js" lang="zxx">
 <head>
@@ -24,6 +32,7 @@
 	<link rel="stylesheet" href="assets/css/slick.css">
 	<link rel="stylesheet" href="assets/css/nice-select.css">
 	<link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="stylesblock.css">
 </head>
 <body>
     <!-- ? Preloader Start -->
@@ -37,6 +46,39 @@
             </div>
         </div>
     </div>
+     <?php if (!$is_logged_in): ?>
+    <!-- Overlay de Login Obrigatório -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <div class="lock-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2>Acesso Restrito</h2>
+            <p><strong>Para aceder ao Leitor de Código de Barras é obrigatório estar logado!</strong></p>
+            
+            <div class="feature-list">
+                <p><strong>Com login terá acesso a:</strong></p>
+                <ul>
+                    <li><i class="fas fa-check"></i> Scanner de códigos de barras</li>
+                    <li><i class="fas fa-check"></i> Histórico de produtos escaneados</li>
+                    <li><i class="fas fa-check"></i> Carrinho de compras personalizado</li>
+                </ul>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <a href="login.php" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Fazer Login
+                </a>
+                <a href="registar.php" class="login-btn register-btn">
+                    <i class="fas fa-user-plus"></i> Registar-se
+                </a>
+            </div>
+            
+            
+        </div>
+    </div>
+    <?php endif; ?>
+    
     <!-- Preloader Start -->
     <?php include("cabecalho.php"); ?>
     <main>

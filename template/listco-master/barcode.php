@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+// Verificar se o utilizador está logado
+$is_logged_in = isset($_SESSION['logged_in']) && $_SESSION['logged_in'];
+$user_email = $is_logged_in ? $_SESSION['user_email'] : '';
+?>
+
+
 <!doctype html>
 <html class="no-js" lang="pt">
 <head>
@@ -7,66 +16,66 @@
     <meta name="description" content="Leitor de código de barras integrado">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="shortcut icon" type="image/x-icon" href="../assets/img/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
 
     <!-- CSS here -->
-    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../assets/css/owl.carousel.min.css">
-    <link rel="stylesheet" href="../assets/css/slicknav.css">
-    <link rel="stylesheet" href="../assets/css/flaticon.css">
-    <link rel="stylesheet" href="../assets/css/progressbar_barfiller.css">
-    <link rel="stylesheet" href="../assets/css/gijgo.css">
-    <link rel="stylesheet" href="../assets/css/animate.min.css">
-    <link rel="stylesheet" href="../assets/css/animated-headline.css">
-    <link rel="stylesheet" href="../assets/css/magnific-popup.css">
-    <link rel="stylesheet" href="../assets/css/fontawesome-all.min.css">
-    <link rel="stylesheet" href="../assets/css/themify-icons.css">
-    <link rel="stylesheet" href="../assets/css/slick.css">
-    <link rel="stylesheet" href="../assets/css/nice-select.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/css/slicknav.css">
+    <link rel="stylesheet" href="assets/css/flaticon.css">
+    <link rel="stylesheet" href="assets/css/progressbar_barfiller.css">
+    <link rel="stylesheet" href="assets/css/gijgo.css">
+    <link rel="stylesheet" href="assets/css/animate.min.css">
+    <link rel="stylesheet" href="assets/css/animated-headline.css">
+    <link rel="stylesheet" href="assets/css/magnific-popup.css">
+    <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/slick.css">
+    <link rel="stylesheet" href="assets/css/nice-select.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="styleqrcode.css">
+    <link rel="stylesheet" href="stylesblock.css">
+
     
-    <link rel="stylesheet" href="style.css">
     <!-- Quagga.js for barcode scanning -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 
 <body>
-    <header>
-        <!-- Header Start -->
-        <div class="header-area header-transparent">
-            <div class="main-header header-sticky">
-                <div class="container-fluid">
-                    <div class="menu-wrapper d-flex align-items-center justify-content-between">
-                        <!-- Logo -->
-                        <div class="logo">
-                            <a href="../index.php"><img src="../assets/img/logo/new_logo.png" alt=""></a>
-                        </div>
-                        <!-- Main-menu -->
-                        <div class="main-menu f-right d-none d-lg-block">
-                            <nav>
-                                <ul id="navigation">
-                                    <li><a href="../index.php">Home</a></li>
-                                    <li><a href="../listing.php">Produtos</a></li> 
-                                    <li><a href="../barcode/barcode.php">Scaner</a></li>
-                                    <li><a href="../contact.php">Contactos</a></li>
-                                </ul>
-                            </nav>
-                        </div>          
-                        <!-- Header-btn -->
-                        <div class="header-btns d-none d-lg-block f-right">
-                            <a href="../login/login.php" class="mr-40"><i class="ti-user"></i> Log in</a>
-                            <a href="../blog.php" class="btn">Ver carrinho</a>
-                        </div>
-                        <!-- Mobile Menu -->
-                        <div class="col-12">
-                            <div class="mobile_menu d-block d-lg-none"></div>
-                        </div>
-                    </div>
-                </div>
+    <?php if (!$is_logged_in): ?>
+    <!-- Overlay de Login Obrigatório -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <div class="lock-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2>Acesso Restrito</h2>
+            <p><strong>Para aceder ao Leitor de Código de Barras é obrigatório estar logado!</strong></p>
+            
+            <div class="feature-list">
+                <p><strong>Com login terá acesso a:</strong></p>
+                <ul>
+                    <li><i class="fas fa-check"></i> Scanner de códigos de barras</li>
+                    <li><i class="fas fa-check"></i> Histórico de produtos escaneados</li>
+                    <li><i class="fas fa-check"></i> Carrinho de compras personalizado</li>
+                </ul>
+            </div>
+            
+            <div class="button-container">
+                <a href="login.php" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Fazer Login
+                </a>
+                <a href="registar.php" class="login-btn register-btn">
+                    <i class="fas fa-user-plus"></i> Registar-se
+                </a>
             </div>
         </div>
-        <!-- Header End -->
-    </header>
+    </div>
+    <?php endif; ?>
+    
+    
+    <!-- Preloader Start -->
+    <?php include("cabecalho.php"); ?>
 
     <main>
         <!--? Hero Area Start-->
@@ -148,7 +157,7 @@
         <!-- Products Section End -->
     </main>
 
-    <?php include("../rodape.php"); ?>
+    <?php include("rodape.php"); ?>
 
     <!-- Scroll Up -->
     <div id="back-top">
@@ -156,6 +165,62 @@
     </div>
 
     <script>
+
+       // Adiciona este script no index.php e outras páginas que precisam de autenticação
+
+async function checkUserSession() {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'check_session');
+        
+        const response = await fetch('/site/controller/controllerUser.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.logged_in) {
+            // Utilizador está logado
+            console.log('Utilizador logado:', data.user.email);
+            showUserInfo(data.user);
+        } else {
+            // Utilizador não está logado - não fazer nada (página é pública)
+            console.log('Utilizador não está logado');
+            // Não redirecionar
+        }
+    } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+    }
+}
+
+
+
+async function logout() {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'logout');
+        
+        const response = await fetch('/site/controller/controllerUser.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Logout realizado com sucesso!');
+            window.location.href = '/site/template/listco-master/login.php';
+        }
+    } catch (error) {
+        console.error('Erro no logout:', error);
+    }
+}
+
+// Verificar sessão quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    checkUserSession();
+});
         class BarcodeReader {
             constructor() {
                 this.isScanning = false;
@@ -492,19 +557,32 @@
                 try {
                     const productInfo = await this.getProductInfo(barcode);
                     this.addProduct(productInfo);
-                    this.showStatusMessage('Produto adicionado com sucesso!', 'success');
+                    
+                    // Guardar automaticamente na base de dados
+                    await this.saveProductToDatabase(productInfo);
+                    
+                    this.showStatusMessage('Produto adicionado e guardado na base de dados!', 'success');
                 } catch (error) {
                     console.error('Erro ao buscar produto:', error);
                     this.showStatusMessage('Erro ao buscar informações. Produto adicionado com dados básicos.', 'error');
                     
-                    this.addProduct({
+                    const basicProduct = {
                         barcode: barcode,
                         name: 'Produto não identificado',
                         price: 'Preço não disponível',
                         brand: 'Marca não identificada',
                         category: 'Categoria não identificada',
                         source: 'Local'
-                    });
+                    };
+                    
+                    this.addProduct(basicProduct);
+                    
+                    // Tentar guardar mesmo com dados básicos
+                    try {
+                        await this.saveProductToDatabase(basicProduct);
+                    } catch (saveError) {
+                        console.error('Erro ao guardar produto básico:', saveError);
+                    }
                 } finally {
                     this.showLoading(false);
                 }
@@ -748,6 +826,12 @@
 
             async saveProductToDatabase(product) {
                 try {
+                    // Limpar preço para enviar apenas o valor numérico
+                    let cleanPrice = '';
+                    if (product.price && product.price !== 'Preço não disponível') {
+                        cleanPrice = product.price.replace('€', '').trim();
+                    }
+                    
                     const response = await fetch('saveProduct.php', {
                         method: 'POST',
                         headers: {
@@ -756,24 +840,39 @@
                         },
                         body: JSON.stringify({
                             barcode: product.barcode,
-                            name: product.name,
-                            brand: product.brand,
-                            category: product.category,
-                            price: product.price,
+                            name: product.name || 'Produto não identificado',
+                            brand: product.brand || 'Marca não identificada',
+                            category: product.category || 'Categoria não identificada',
+                            price: cleanPrice,
                         })
                     });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
 
                     const result = await response.json();
                     
                     if (result.success) {
-                        this.showStatusMessage('✅ Produto salvo na base de dados', 'success');
+                        console.log('✅ Produto guardado na base de dados:', result);
+                        if (result.action === 'updated') {
+                            this.showStatusMessage('📝 Produto atualizado na base de dados', 'success');
+                        } else {
+                            this.showStatusMessage('💾 Produto guardado na base de dados', 'success');
+                        }
                     } else {
-                        throw new Error(result.message || 'Erro ao salvar');
+                        throw new Error(result.message || 'Erro desconhecido ao guardar');
                     }
                     
                 } catch (error) {
-                    console.error('Erro ao salvar:', error);
-                    this.showStatusMessage('⚠️ Erro ao salvar na BD', 'error');
+                    console.error('❌ Erro ao guardar produto na BD:', error);
+                    this.showStatusMessage('⚠️ Erro ao guardar na base de dados', 'error');
+                    
+                    // Log detalhado para debug
+                    console.error('Detalhes do erro:', {
+                        message: error.message,
+                        product: product
+                    });
                 }
             }
         }

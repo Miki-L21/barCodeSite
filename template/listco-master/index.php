@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+// Verificar se o utilizador está logado
+$is_logged_in = isset($_SESSION['logged_in']) && $_SESSION['logged_in'];
+$user_email = $is_logged_in ? $_SESSION['user_email'] : '';
+?>
+
+
 <!doctype html>
 <html class="no-js" lang="zxx">
 <head>
@@ -189,7 +198,61 @@
     <script src="./assets/js/plugins.js"></script>
     <script src="./assets/js/main.js"></script>
 
+    <script>script>// Adiciona este script no index.php e outras páginas que precisam de autenticação
 
+async function checkUserSession() {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'check_session');
+        
+        const response = await fetch('/site/controller/controllerUser.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.logged_in) {
+            // Utilizador está logado
+            console.log('Utilizador logado:', data.user.email);
+            showUserInfo(data.user);
+        } else {
+            // Utilizador não está logado - não fazer nada (página é pública)
+            console.log('Utilizador não está logado');
+            // Não redirecionar
+        }
+    } catch (error) {
+        console.error('Erro ao verificar sessão:', error);
+    }
+}
+
+
+
+async function logout() {
+    try {
+        const formData = new FormData();
+        formData.append('action', 'logout');
+        
+        const response = await fetch('/site/controller/controllerUser.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Logout realizado com sucesso!');
+            window.location.href = '/site/template/listco-master/login.php';
+        }
+    } catch (error) {
+        console.error('Erro no logout:', error);
+    }
+}
+
+// Verificar sessão quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    checkUserSession();
+});</script>
     
     </body>
 </html>

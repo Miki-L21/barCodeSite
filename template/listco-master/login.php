@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login</title>
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+
+    <!-- CSS principal do template -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/css/slicknav.css">
+    <link rel="stylesheet" href="assets/css/flaticon.css">
+    <link rel="stylesheet" href="assets/css/progressbar_barfiller.css">
+    <link rel="stylesheet" href="assets/css/gijgo.css">
+    <link rel="stylesheet" href="assets/css/animate.min.css">
+    <link rel="stylesheet" href="assets/css/animated-headline.css">
+    <link rel="stylesheet" href="assets/css/magnific-popup.css">
+    <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/slick.css">
+    <link rel="stylesheet" href="assets/css/nice-select.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+
+        body {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.login-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        url('assets/img/hero/h1_hero.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding-top: 80px;
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 40px 30px;
+    font-size: 1.2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.login-card h2 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #222;
+}
+
+.login-card label {
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.login-card input {
+    height: 58px;
+    font-size: 1.2rem;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition: all 0.3s ease-in-out;
+}
+
+.login-card input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+    outline: none;
+}
+
+.login-card button {
+    height: 58px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    border-radius: 8px;
+    background-color: #007bff;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.login-card button:hover {
+    background-color: #0056b3;
+}
+.login-card a.btn {
+    font-size: 1.1rem;
+    font-weight: 500;
+    height: 55px;
+    line-height: 38px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.login-card a.btn:hover {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+</style>
+</head>
+<body>
+
+    <!-- Inclui cabeçalho -->
+    <?php include 'cabecalho.php'; ?>
+
+     <!-- Hero Area com fundo igual ao site -->
+    <section class="login-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+               <div class="card shadow login-card">
+                    <h2 class="text-center mb-4">Login</h2>
+                    
+                    <div id="message" class="alert d-none"></div>
+                    
+                    <form id="loginForm">
+                        <div class="form-group mb-3">
+                            <label for="email">Email:</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="password">Password:</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" id="loginBtn" class="btn btn-primary w-100">Entrar</button>
+                    </form>
+                    
+                    <!-- Botão "Criar" FORA do formulário -->
+                    <div class="text-center mt-3">
+                        <p>Não tens conta? Queres criar?</p>
+                        <a href="registar.php" class="btn btn-secondary w-100">Criar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+    
+    <!-- Inclui rodapé -->
+    <?php include 'rodape.php'; ?>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const loginBtn = document.getElementById('loginBtn');
+        const messageDiv = document.getElementById('message');
+
+        messageDiv.classList.add('d-none');
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Aguarde...';
+
+        try {
+            const formData = new FormData();
+            formData.append('action', 'login');
+            formData.append('email', email);
+            formData.append('password', password);
+
+            const response = await fetch('/site/controller/controllerUser.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Guarda o email como identificador da sessão (ou token, se tiveres)
+                localStorage.setItem('utilizador', email); // ou sessionStorage.setItem()
+
+                messageDiv.textContent = data.message;
+                messageDiv.className = 'alert alert-success';
+                messageDiv.classList.remove('d-none');
+
+                 setTimeout(() => {
+                    window.location.href = 'index.php'; // Redireciona para index.php
+                }, 1000);
+
+            } else {
+                messageDiv.textContent = data.message;
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.classList.remove('d-none');
+            }
+
+        } catch (error) {
+            messageDiv.textContent = 'Erro de conexão. Tente novamente.';
+            messageDiv.className = 'alert alert-danger';
+            messageDiv.classList.remove('d-none');
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Entrar';
+        }
+    });
+</script>
+</body>
+</html>
