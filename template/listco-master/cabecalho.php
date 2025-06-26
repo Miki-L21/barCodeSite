@@ -28,7 +28,7 @@
                             <a href="login.php" class="mr-40"><i class="ti-user"></i> Log in</a>
                         <?php endif; ?>
                         
-                        <a href="blog.php" class="btn">Ver carrinho</a>
+                        <a href="blog.php" class="btn">Ver Lista</a>
                     </div>
                     <!-- Mobile Menu -->
                     <div class="col-12">

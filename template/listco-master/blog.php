@@ -260,24 +260,6 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                                                 </a>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <div class="total-section">
-                                                <div class="total-box p-4 bg-light border rounded">
-                                                    <h5 class="mb-3">Resumo do Pedido</h5>
-                                                    <div class="total-line d-flex justify-content-between mb-2">
-                                                        <span>Subtotal:</span>
-                                                        <span id="subtotal">€0.00</span>
-                                                    </div>
-                                                    <div class="total-line d-flex justify-content-between mb-3">
-                                                        <strong>Total:</strong>
-                                                        <strong id="total-amount">€0.00</strong>
-                                                    </div>
-                                                    <button class="btn btn-success btn-block btn-lg">
-                                                        <i class="fas fa-credit-card"></i> Finalizar Compra
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -428,6 +410,32 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
             displayCartItems();
         }
     }
+
+    const listaCompras = async () => {
+      let strHtml = ``;
+      const response = await fetch("localhost/site/public/api/compras");
+      const lv = await response.json();
+      for (const artigo of lv) {
+        strHtml += `
+            <div class="product-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-5">
+                            <div class="product-info">
+                                <h5>${item.name}</h5>
+                                <p class="product-brand mb-1">Marca: ${item.brand}</p>
+                                <small class="product-code">Código: ${item.barcode}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="product-price">${item.price}</div>
+                        </div>
+                    </div>
+            </div>
+        `;
+      }
+      document.getElementById("products-list").innerHTML = strHtml;
+    };
+    listaCompras();
     </script>
 
 </body>

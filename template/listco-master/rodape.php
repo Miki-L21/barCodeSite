@@ -34,8 +34,7 @@
                                     <ul>
                                         <li><a href="index.php">Home</a></li>
                                         <li><a href="listning.php">Produtos</a></li> 
-                                        <li><a href="barcode/barcode.php">Scaner</a></li>
-                                        <li><a href="blog.html">Blog</a></li>
+                                        <li><a href="barcode.php">Scaner</a></li>
                                         <li><a href="contact.php">Contatos</a></li>
                                     </ul>
                                 </nav>
