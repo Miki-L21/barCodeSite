@@ -825,25 +825,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
             async saveProductToDatabase(product) {
                 try {
-                    // Limpar preço para enviar apenas o valor numérico
-                    let cleanPrice = '';
-                    if (product.price && product.price !== 'Preço não disponível') {
-                        cleanPrice = product.price.replace('€', '').trim();
-                    }
+                    // Preparar dados para enviar
+                    const productData = {
+                        barcode: product.barcode,
+                        name: product.name || 'Produto não identificado',
+                        brand: product.brand || 'Marca não identificada',
+                        category: product.category || 'Categoria não identificada',
+                        price: product.price || 'Preço não disponível'
+                    };
                     
-                    const response = await fetch('saveProduct.php', {
+                    const response = await fetch('http://localhost/site/controller/barcodeApi.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'Accept': 'application/json'
                         },
-                        body: JSON.stringify({
-                            barcode: product.barcode,
-                            name: product.name || 'Produto não identificado',
-                            brand: product.brand || 'Marca não identificada',
-                            category: product.category || 'Categoria não identificada',
-                            price: cleanPrice,
-                        })
+                        body: JSON.stringify(productData)
                     });
 
                     if (!response.ok) {
@@ -853,19 +850,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     const result = await response.json();
                     
                     if (result.success) {
-                        console.log('✅ Produto guardado na base de dados:', result);
-                        if (result.action === 'updated') {
-                            this.showStatusMessage('📝 Produto atualizado na base de dados', 'success');
+                        console.log('✅ Produto processado pela API:', result);
+                        
+                        // Mensagem diferente baseada na ação
+                        if (result.product && result.product.action === 'updated') {
+                            this.showStatusMessage('📝 Produto atualizado e associado!', 'success');
                         } else {
-                            this.showStatusMessage('💾 Produto guardado na base de dados', 'success');
+                            this.showStatusMessage('💾 Produto guardado e associado!', 'success');
                         }
                     } else {
-                        throw new Error(result.message || 'Erro desconhecido ao guardar');
+                        throw new Error(result.message || 'Erro desconhecido da API');
                     }
                     
                 } catch (error) {
-                    console.error('❌ Erro ao guardar produto na BD:', error);
-                    this.showStatusMessage('⚠️ Erro ao guardar na base de dados', 'error');
+                    console.error('❌ Erro na API de Barcode:', error);
+                    this.showStatusMessage('⚠️ Erro ao guardar produto: ' + error.message, 'error');
                     
                     // Log detalhado para debug
                     console.error('Detalhes do erro:', {
