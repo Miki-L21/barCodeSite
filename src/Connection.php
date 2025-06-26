@@ -1,7 +1,7 @@
 <?php
 
-//version 1.3
-// 2025/05/27
+//version 1.4
+// 2025/06/26 - Corrigido para PostgreSQL/Supabase
 
 namespace src;
 
@@ -12,21 +12,38 @@ define('_DEBUG', true);
 
 class Connection
 {
-    // put the database stuffs here in that scope
-    private $host = _SERVER;
-    private $db_name = _BDUSER;
-    private $username = _BD;
-    private $password = _BDPASS;
+    private $host;
+    private $port;
+    private $db_name;
+    private $username;
+    private $password;
     public $conn;
+
+    public function __construct() {
+        // Carregar configurações do env.php
+        $config = require __DIR__ . '/../controller/env.php';
+        
+        $this->host = $config['host'];
+        $this->port = $config['port'];
+        $this->db_name = $config['dbname'];
+        $this->username = $config['username'];
+        $this->password = $config['password'];
+    }
 
     public function getConnection()
     {
         $this->conn = null;
         try {
-            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
+            // DSN para PostgreSQL
+            $dsn = "pgsql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name;
+            $this->conn = new PDO($dsn, $this->username, $this->password);
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->exec("set names utf8");
         } catch (\PDOException $exception) {
-            echo "Erro na conexão: " . $exception->getMessage();
+            if ($this->isDebug()) {
+                echo "Erro na conexão: " . $exception->getMessage();
+            }
+            error_log("Database connection error: " . $exception->getMessage());
         }
         return $this->conn;
     }
@@ -48,36 +65,56 @@ class Connection
     public function getData($sql, $parameters = [])
     {
         try {
+            // Verificar se a conexão existe
+            if (!$this->conn) {
+                $this->getConnection();
+            }
+            
             $stmt = $this->conn->prepare($sql);
-            if (!$parameters == "") {
+            
+            if (!empty($parameters)) {
                 foreach ($parameters as $key => $value) {
                     $this->bindParamAuto($stmt, ':' . $key, $value);
                 }
             }
+            
             $stmt->execute();
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
         } catch (\PDOException $e) {
-            return json_encode(['msg' => 'Erro: ' . $e->getMessage(), 'status' => '500']);
+            if ($this->isDebug()) {
+                error_log("Database getData error: " . $e->getMessage());
+            }
+            return [
+                'error' => true,
+                'msg' => 'Erro na consulta: ' . $e->getMessage(), 
+                'status' => 500
+            ];
         }
     }
 
     public function setData($sql, $parameters = [])
     {
         try {
+            // Verificar se a conexão existe
+            if (!$this->conn) {
+                $this->getConnection();
+            }
+            
             $stmt = $this->conn->prepare($sql);
 
             // Vincula os parâmetros, se fornecidos
             if (!empty($parameters)) {
                 foreach ($parameters as $key => $value) {
-                    //echo $key . "|";
                     $this->bindParamAuto($stmt, ':' . $key, $value);
                 }
             }
 
-            /* echo "<pre>SQL original:\n$sql\n\nParâmetros:\n";
-            print_r($parameters);
-            echo "</pre>";
- */
+            if ($this->isDebug()) {
+                error_log("SQL: " . $sql);
+                error_log("Parameters: " . json_encode($parameters));
+            }
+
             // Executa a consulta
             $stmt->execute();
 
@@ -86,12 +123,12 @@ class Connection
 
             // Verifica o tipo de operação (baseado no comando SQL)
             $operation = strtoupper(explode(' ', trim($sql))[0]);
-            $response = ['status' => '200', 'operation' => $operation];
+            $response = ['status' => 200, 'operation' => $operation];
 
             switch ($operation) {
                 case 'INSERT':
-                    // Para INSERT, podemos retornar o último ID inserido (se for relevante)
                     $response['msg'] = 'Registro inserido com sucesso.';
+                    // Para PostgreSQL, usar RETURNING id ou currval() se necessário
                     $response['lastInsertId'] = $this->conn->lastInsertId();
                     break;
 
@@ -113,18 +150,18 @@ class Connection
 
             return $response;
         } catch (\PDOException $e) {
-            // Tratamento de erros
+            if ($this->isDebug()) {
+                error_log("Database setData error: " . $e->getMessage());
+            }
             return [
-                'status' => '500',
+                'status' => 500,
                 'msg' => 'Erro: ' . $e->getMessage()
             ];
         }
     }
 
-
     /**
      * Método auxiliar para verificar se está em modo debug
-     * Retorna true para exibir informações de depuração
      */
     private function isDebug()
     {

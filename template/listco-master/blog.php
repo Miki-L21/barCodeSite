@@ -4,6 +4,7 @@ session_start();
 // Verificar se o utilizador está logado
 $is_logged_in = isset($_SESSION['logged_in']) && $_SESSION['logged_in'];
 $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
+$user_id = $is_logged_in ? $_SESSION['user_id'] : null;
 ?>
 
 <!doctype html>
@@ -25,123 +26,104 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     <link rel="stylesheet" href="assets/css/magnific-popup.css">
     <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
     <link rel="stylesheet" href="assets/css/themify-icons.css">
-    <link rel="stylesheet" href="assets/css/themify-icons.css">
     <link rel="stylesheet" href="assets/css/slick.css">
     <link rel="stylesheet" href="assets/css/nice-select.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/responsive.css">
     <link rel="stylesheet" href="stylesblock.css">
-    
+
     <style>
-    /* Estilos para Lista de Compras */
-    .shopping-list-area {
-        background-color: #f8f9fa;
-    }
-
-    .shopping-list-wrapper {
-        background: white;
-        border-radius: 10px;
-        padding: 30px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .product-item {
-        background: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 15px;
-        transition: all 0.3s ease;
-    }
-
-    .product-item:hover {
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
-    }
-
-    .product-info h5 {
-        color: #333;
-        margin-bottom: 5px;
-    }
-
-    .product-brand {
-        color: #666;
-        font-size: 0.9rem;
-    }
-
-    .product-code {
-        color: #999;
-        font-size: 0.8rem;
-    }
-
-    .product-price {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #28a745;
-    }
-
-    .quantity-controls {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .quantity-controls .btn {
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .quantity-display {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 5px;
-        padding: 8px 15px;
-        min-width: 50px;
-        text-align: center;
-        font-weight: bold;
-    }
-
-    .item-total {
-        font-size: 1.1rem;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .cart-summary {
-        border-top: 2px solid #e0e0e0;
-        padding-top: 20px;
-    }
-
-    .total-box {
-        border: 2px solid #28a745 !important;
-    }
-
-    .total-line {
-        border-bottom: 1px solid #e0e0e0;
-        padding-bottom: 5px;
-    }
-
-    .empty-cart-message {
-        padding: 60px 20px;
-    }
-
-    @media (max-width: 768px) {
-        .product-item .row > div {
+        /* Estilos para Lista de Compras */
+        .shopping-list-area {
+            background-color: #f8f9fa;
+        }
+        .shopping-list-wrapper {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .product-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
             margin-bottom: 15px;
+            transition: all 0.3s ease;
         }
-        
-        .cart-summary .row > div {
-            margin-bottom: 20px;
+        .product-item:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
         }
-    }
+        .product-info h5 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .product-brand {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .product-code {
+            color: #999;
+            font-size: 0.8rem;
+        }
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .quantity-controls .btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .quantity-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 8px 15px;
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .item-total {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .cart-summary {
+            border-top: 2px solid #e0e0e0;
+            padding-top: 20px;
+        }
+        .total-box {
+            border: 2px solid #28a745 !important;
+        }
+        .total-line {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+        .empty-cart-message {
+            padding: 60px 20px;
+        }
+        @media (max-width: 768px) {
+            .product-item .row > div {
+                margin-bottom: 15px;
+            }
+            .cart-summary .row > div {
+                margin-bottom: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-    <!--? Preloader Start -->
     <div id="preloader-active">
         <div class="preloader d-flex align-items-center justify-content-center">
             <div class="preloader-inner position-relative">
@@ -154,7 +136,6 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     </div>
 
     <?php if (!$is_logged_in): ?>
-    <!-- Overlay de Login Obrigatório -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-modal">
             <div class="lock-icon">
@@ -162,7 +143,6 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
             </div>
             <h2>Acesso Restrito</h2>
             <p><strong>Para aceder ao Leitor de Código de Barras é obrigatório estar logado!</strong></p>
-            
             <div class="feature-list">
                 <p><strong>Com login terá acesso a:</strong></p>
                 <ul>
@@ -171,7 +151,6 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                     <li><i class="fas fa-check"></i> Carrinho de compras personalizado</li>
                 </ul>
             </div>
-            
             <div style="margin-top: 30px;">
                 <a href="login.php" class="login-btn">
                     <i class="fas fa-sign-in-alt"></i> Fazer Login
@@ -183,14 +162,12 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
         </div>
     </div>
     <?php endif; ?>
-    
-    <!-- Preloader Start -->
+
     <?php include("cabecalho.php"); ?>
-    
+
     <main>
-        <!--? Hero Start -->
         <div class="slider-area2">
-            <div class="slider-height3  hero-overly hero-bg4 d-flex align-items-center">
+            <div class="slider-height3 hero-overly hero-bg4 d-flex align-items-center">
                 <div class="container">
                     <div class="row">
                         <div class="col-xl-12">
@@ -202,9 +179,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                 </div>
             </div>
         </div>
-        <!-- Hero End -->
 
-        <!-- Lista de Compras -->
         <section class="shopping-list-area section-padding">
             <div class="container">
                 <div class="row justify-content-center">
@@ -215,11 +190,10 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="shopping-list-wrapper">
-                            <!-- Carrinho Vazio -->
                             <div id="empty-cart" class="empty-cart-message text-center" style="display: none;">
                                 <div class="empty-cart-icon mb-4">
                                     <i class="fas fa-shopping-cart" style="font-size: 4rem; color: #ddd;"></i>
@@ -230,8 +204,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                                     <i class="fas fa-barcode"></i> Escanear Produtos
                                 </a>
                             </div>
-                            
-                            <!-- Lista de Produtos -->
+
                             <div id="cart-items" style="display: none;">
                                 <div class="cart-header mb-4">
                                     <div class="row align-items-center">
@@ -245,13 +218,14 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div id="products-list" class="products-list">
-                                    <!-- Os produtos serão inseridos aqui dinamicamente -->
-                                </div>
-                                
-                                <!-- Total e Ações -->
+                                <div id="products-list" class="products-list"></div>
                                 <div class="cart-summary mt-4">
+                                    <div class="row mt-3">
+                                        <div class="col text-right">
+                                            <p>Subtotal: <strong id="subtotal">€0.00</strong></p>
+                                            <p>Total: <strong id="total-amount">€0.00</strong></p>
+                                        </div>
+                                    </div>
                                     <div class="row">
                                         <div class="col-md-8">
                                             <div class="cart-actions">
@@ -269,51 +243,42 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
             </div>
         </section>
     </main>
-    
+
     <?php include("rodape.php"); ?>
-    
-    <!-- Scroll Up -->
-    <div id="back-top" >
+
+    <?php
+var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
+?>
+
+
+    <div id="back-top">
         <a title="Go to Top" href="#"> <i class="fas fa-level-up-alt"></i></a>
     </div>
-    
-    <!-- JS here -->
+
+    <!-- Scripts -->
     <script src="./assets/js/vendor/modernizr-3.5.0.min.js"></script>
-    <!-- Jquery, Popper, Bootstrap -->
     <script src="./assets/js/vendor/jquery-1.12.4.min.js"></script>
+    <script src="./assets/js/jquery.barfiller.js"></script>
     <script src="./assets/js/popper.min.js"></script>
     <script src="./assets/js/bootstrap.min.js"></script>
-    <!-- Jquery Mobile Menu -->
     <script src="./assets/js/jquery.slicknav.min.js"></script>
-
-    <!-- Jquery Slick , Owl-Carousel Plugins -->
     <script src="./assets/js/owl.carousel.min.js"></script>
     <script src="./assets/js/slick.min.js"></script>
-    <!-- One Page, Animated-HeadLin -->
     <script src="./assets/js/wow.min.js"></script>
     <script src="./assets/js/animated.headline.js"></script>
     <script src="./assets/js/jquery.magnific-popup.js"></script>
-
-    <!-- Date Picker -->
     <script src="./assets/js/gijgo.min.js"></script>
-    <!-- Nice-select, sticky -->
     <script src="./assets/js/jquery.nice-select.min.js"></script>
     <script src="./assets/js/jquery.sticky.js"></script>
-    
-    <!-- counter , waypoint,Hover Direction -->
     <script src="./assets/js/jquery.counterup.min.js"></script>
     <script src="./assets/js/waypoints.min.js"></script>
     <script src="./assets/js/jquery.countdown.min.js"></script>
     <script src="./assets/js/hover-direction-snake.min.js"></script>
-
-    <!-- contact js -->
     <script src="./assets/js/contact.js"></script>
     <script src="./assets/js/jquery.form.js"></script>
     <script src="./assets/js/jquery.validate.min.js"></script>
     <script src="./assets/js/mail-script.js"></script>
     <script src="./assets/js/jquery.ajaxchimp.min.js"></script>
-    
-    <!-- Jquery Plugins, main Jquery -->	
     <script src="./assets/js/plugins.js"></script>
     <script src="./assets/js/main.js"></script>
 
@@ -327,24 +292,24 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
         const emptyCart = document.getElementById('empty-cart');
         const cartItems = document.getElementById('cart-items');
         const productsList = document.getElementById('products-list');
-        
+
         if (cart.length === 0) {
             emptyCart.style.display = 'block';
             cartItems.style.display = 'none';
             return;
         }
-        
+
         emptyCart.style.display = 'none';
         cartItems.style.display = 'block';
-        
+
         let productsHTML = '';
         let total = 0;
-        
+
         cart.forEach((item, index) => {
             const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.')) || 0;
             const itemTotal = itemPrice * item.quantity;
             total += itemTotal;
-            
+
             productsHTML += `
                 <div class="product-item">
                     <div class="row align-items-center">
@@ -379,7 +344,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                 </div>
             `;
         });
-        
+
         productsList.innerHTML = productsHTML;
         document.getElementById('subtotal').textContent = `€${total.toFixed(2)}`;
         document.getElementById('total-amount').textContent = `€${total.toFixed(2)}`;
@@ -388,11 +353,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     function updateQuantity(index, change) {
         let cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
         cart[index].quantity += change;
-        
-        if (cart[index].quantity <= 0) {
-            cart.splice(index, 1);
-        }
-        
+        if (cart[index].quantity <= 0) cart.splice(index, 1);
         localStorage.setItem('shopping_cart', JSON.stringify(cart));
         displayCartItems();
     }
@@ -411,32 +372,85 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
         }
     }
 
-    const listaCompras = async () => {
-      let strHtml = ``;
-      const response = await fetch("localhost/site/public/api/compras");
-      const lv = await response.json();
-      for (const artigo of lv) {
-        strHtml += `
-            <div class="product-item">
+    document.addEventListener('DOMContentLoaded', function() {
+    displayCartItems();
+
+    // Apenas busca os produtos se o utilizador estiver logado
+    <?php if ($is_logged_in): ?>
+        fetchProdutosUserLogado();
+    <?php endif; ?>
+});
+
+
+    // Função comentada até que seja usada corretamente
+    
+    async function fetchProdutosUserLogado() {
+    try {
+        const response = await fetch('http://localhost/site/controller/apiProdutosUser.php'); // Caminho da nova API
+        const json = await response.json();
+
+        console.log('Resposta da API:', json);
+
+        if (!json.success) {
+            alert('Erro: ' + (json.message || 'Erro desconhecido'));
+            return;
+        }
+
+        const produtos = json.data.produtos;
+
+        if (produtos.length === 0) {
+            document.getElementById('empty-cart').style.display = 'block';
+            document.getElementById('cart-items').style.display = 'none';
+            return;
+        }
+
+        document.getElementById('empty-cart').style.display = 'none';
+        document.getElementById('cart-items').style.display = 'block';
+
+        const productsList = document.getElementById('products-list');
+        let html = '';
+        let total = 0;
+
+        produtos.forEach((item, index) => {
+            const preco = parseFloat(item.produto_preco.replace(',', '.')) || 0;
+            const quantidade = 1;
+            const subtotal = preco * quantidade;
+            total += subtotal;
+
+            html += `
+                <div class="product-item">
                     <div class="row align-items-center">
                         <div class="col-md-5">
                             <div class="product-info">
-                                <h5>${item.name}</h5>
-                                <p class="product-brand mb-1">Marca: ${item.brand}</p>
-                                <small class="product-code">Código: ${item.barcode}</small>
+                                <h5>${item.produto_nome}</h5>
+                                <p class="product-brand mb-1">Marca: ${item.produto_marca}</p>
+                                <small class="product-code">Código: ${item.produto_barcode}</small>
                             </div>
                         </div>
                         <div class="col-md-2 text-center">
-                            <div class="product-price">${item.price}</div>
+                            <div class="product-price">€${preco.toFixed(2)}</div>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="quantity-display">1</div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="item-total mb-2">€${subtotal.toFixed(2)}</div>
                         </div>
                     </div>
-            </div>
-        `;
-      }
-      document.getElementById("products-list").innerHTML = strHtml;
-    };
-    listaCompras();
-    </script>
+                </div>
+            `;
+        });
 
+        productsList.innerHTML = html;
+        document.getElementById('subtotal').textContent = `€${total.toFixed(2)}`;
+        document.getElementById('total-amount').textContent = `€${total.toFixed(2)}`;
+    } catch (err) {
+        console.error('Erro ao buscar produtos:', err);
+        alert('Erro ao conectar com a API');
+    }
+}
+
+    
+    </script>
 </body>
 </html>
