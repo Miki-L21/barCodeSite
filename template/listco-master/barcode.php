@@ -193,6 +193,12 @@ async function checkUserSession() {
     }
 }
 
+function showUserInfo() {
+    // Exemplo: atualiza um div com info do utilizador
+    const userDiv = document.getElementById("user-info");
+    if (userDiv) userDiv.innerText = "Sessão iniciada.";
+  }
+
 
 
 async function logout() {

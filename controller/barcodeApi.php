@@ -81,13 +81,13 @@ class BarcodeAPI {
     }
 
     private function addProductToUser($productId) {
-        // Simular chamada ao UserProductController
+    // Chamada ao userProductController.php (nome correto com 'u' minúsculo)
         $postData = [
             'action' => 'add_to_user',
             'product_id' => $productId
         ];
 
-        return $this->callController('UserProductController.php', $postData);
+        return $this->callController('userProductController.php', $postData);
     }
 
     private function callController($controllerFile, $postData) {

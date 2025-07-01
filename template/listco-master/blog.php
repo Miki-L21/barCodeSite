@@ -31,97 +31,7 @@ $user_id = $is_logged_in ? $_SESSION['user_id'] : null;
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/responsive.css">
     <link rel="stylesheet" href="stylesblock.css">
-
-    <style>
-        /* Estilos para Lista de Compras */
-        .shopping-list-area {
-            background-color: #f8f9fa;
-        }
-        .shopping-list-wrapper {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        .product-item {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-        .product-item:hover {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-        .product-info h5 {
-            color: #333;
-            margin-bottom: 5px;
-        }
-        .product-brand {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        .product-code {
-            color: #999;
-            font-size: 0.8rem;
-        }
-        .product-price {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #28a745;
-        }
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .quantity-controls .btn {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .quantity-display {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 8px 15px;
-            min-width: 50px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .item-total {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #333;
-        }
-        .cart-summary {
-            border-top: 2px solid #e0e0e0;
-            padding-top: 20px;
-        }
-        .total-box {
-            border: 2px solid #28a745 !important;
-        }
-        .total-line {
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 5px;
-        }
-        .empty-cart-message {
-            padding: 60px 20px;
-        }
-        @media (max-width: 768px) {
-            .product-item .row > div {
-                margin-bottom: 15px;
-            }
-            .cart-summary .row > div {
-                margin-bottom: 20px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/carrinho.css">
 </head>
 <body>
     <div id="preloader-active">
@@ -208,11 +118,14 @@ $user_id = $is_logged_in ? $_SESSION['user_id'] : null;
                             <div id="cart-items" style="display: none;">
                                 <div class="cart-header mb-4">
                                     <div class="row align-items-center">
-                                        <div class="col-md-6">
+                                        <div class="col-md-6 mb-3 mb-md-0">
                                             <h4><i class="fas fa-list"></i> Produtos no Carrinho</h4>
                                         </div>
-                                        <div class="col-md-6 text-right">
-                                            <button onclick="clearCart()" class="btn btn-outline-danger">
+                                        <div class="col-md-6 text-md-right text-center">
+                                            <button onclick="clearPurchasedStatus()" class="btn btn-outline-warning">
+                                                <i class="fas fa-undo"></i> Limpar Comprados
+                                            </button>
+                                            <button onclick="clearCart()" class="btn btn-outline-danger ml-2">
                                                 <i class="fas fa-trash"></i> Limpar Carrinho
                                             </button>
                                         </div>
@@ -385,70 +298,130 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
     // Função comentada até que seja usada corretamente
     
     async function fetchProdutosUserLogado() {
-    try {
-        const response = await fetch('http://localhost/site/controller/apiProdutosUser.php'); // Caminho da nova API
-        const json = await response.json();
+        try {
+            const response = await fetch('http://localhost/site/controller/apiProdutosUser.php');
+            const json = await response.json();
 
-        console.log('Resposta da API:', json);
+            console.log('Resposta da API:', json);
 
-        if (!json.success) {
-            alert('Erro: ' + (json.message || 'Erro desconhecido'));
-            return;
-        }
+            if (!json.success) {
+                alert('Erro: ' + (json.message || 'Erro desconhecido'));
+                return;
+            }
 
-        const produtos = json.data.produtos;
+            const produtos = json.data.produtos;
 
-        if (produtos.length === 0) {
-            document.getElementById('empty-cart').style.display = 'block';
-            document.getElementById('cart-items').style.display = 'none';
-            return;
-        }
+            if (produtos.length === 0) {
+                document.getElementById('empty-cart').style.display = 'block';
+                document.getElementById('cart-items').style.display = 'none';
+                return;
+            }
 
-        document.getElementById('empty-cart').style.display = 'none';
-        document.getElementById('cart-items').style.display = 'block';
+            document.getElementById('empty-cart').style.display = 'none';
+            document.getElementById('cart-items').style.display = 'block';
 
-        const productsList = document.getElementById('products-list');
-        let html = '';
-        let total = 0;
+            const productsList = document.getElementById('products-list');
+            let html = '';
+            let total = 0;
 
-        produtos.forEach((item, index) => {
-            const preco = parseFloat(item.produto_preco.replace(',', '.')) || 0;
-            const quantidade = 1;
-            const subtotal = preco * quantidade;
-            total += subtotal;
+            // Recuperar estado dos produtos comprados do localStorage
+            const purchasedItems = JSON.parse(localStorage.getItem('purchased_items') || '{}');
 
-            html += `
-                <div class="product-item">
-                    <div class="row align-items-center">
-                        <div class="col-md-5">
-                            <div class="product-info">
-                                <h5>${item.produto_nome}</h5>
-                                <p class="product-brand mb-1">Marca: ${item.produto_marca}</p>
-                                <small class="product-code">Código: ${item.produto_barcode}</small>
+            produtos.forEach((item, index) => {
+                const preco = parseFloat(item.produto_preco.replace(',', '.')) || 0;
+                const quantidade = 1;
+                const subtotal = preco * quantidade;
+                total += subtotal;
+
+                const isPurchased = purchasedItems[item.produto_barcode] || false;
+                const purchasedClass = isPurchased ? 'purchased' : '';
+                const buttonClass = isPurchased ? 'btn-purchased' : 'btn-not-purchased';
+                const buttonText = isPurchased ? 'Comprado' : 'Não Comprado';
+                const buttonIcon = isPurchased ? 'fas fa-check' : 'fas fa-times';
+
+                html += `
+                    <div class="product-item ${purchasedClass}" id="product-${item.produto_barcode}">
+                        <div class="row align-items-center">
+                            <div class="col-lg-4 col-md-5 col-sm-12">
+                                <div class="product-info">
+                                    <h5>${item.produto_nome}</h5>
+                                    <p class="product-brand mb-1">Marca: ${item.produto_marca}</p>
+                                    <small class="product-code">Código: ${item.produto_barcode}</small>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-6 col-6 text-center">
+                                <div class="product-price">€${preco.toFixed(2)}</div>
+                            </div>
+                            <div class="col-lg-1 col-md-1 col-sm-6 col-6 text-center">
+                                <div class="quantity-display">1</div>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-6 col-6 text-center">
+                                <div class="item-total mb-2">€${subtotal.toFixed(2)}</div>
+                            </div>
+                            <div class="col-lg-3 col-md-2 col-sm-6 col-6 text-center">
+                                <button onclick="togglePurchased('${item.produto_barcode}')" 
+                                        class="btn purchase-toggle ${buttonClass}" 
+                                        id="btn-${item.produto_barcode}">
+                                    <i class="${buttonIcon}"></i> ${buttonText}
+                                </button>
                             </div>
                         </div>
-                        <div class="col-md-2 text-center">
-                            <div class="product-price">€${preco.toFixed(2)}</div>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <div class="quantity-display">1</div>
-                        </div>
-                        <div class="col-md-2 text-center">
-                            <div class="item-total mb-2">€${subtotal.toFixed(2)}</div>
-                        </div>
                     </div>
-                </div>
-            `;
-        });
+                `;
+            });
 
-        productsList.innerHTML = html;
-        document.getElementById('subtotal').textContent = `€${total.toFixed(2)}`;
-        document.getElementById('total-amount').textContent = `€${total.toFixed(2)}`;
-    } catch (err) {
-        console.error('Erro ao buscar produtos:', err);
-        alert('Erro ao conectar com a API');
+            productsList.innerHTML = html;
+            document.getElementById('subtotal').textContent = `€${total.toFixed(2)}`;
+            document.getElementById('total-amount').textContent = `€${total.toFixed(2)}`;
+        } catch (err) {
+            console.error('Erro ao buscar produtos:', err);
+            alert('Erro ao conectar com a API');
+        }
     }
-}
+
+    function togglePurchased(barcode) {
+        const productElement = document.getElementById(`product-${barcode}`);
+        const buttonElement = document.getElementById(`btn-${barcode}`);
+        
+        if (!productElement || !buttonElement) {
+            console.error('Elementos não encontrados:', barcode);
+            return;
+        }
+        
+        // Recuperar estado atual
+        const purchasedItems = JSON.parse(localStorage.getItem('purchased_items') || '{}');
+        const isPurchased = purchasedItems[barcode] || false;
+        
+        // Alternar estado
+        purchasedItems[barcode] = !isPurchased;
+        localStorage.setItem('purchased_items', JSON.stringify(purchasedItems));
+        
+        // Atualizar visual
+        if (!isPurchased) {
+            // Marcar como comprado
+            productElement.classList.add('purchased');
+            buttonElement.className = 'btn purchase-toggle btn-purchased';
+            buttonElement.innerHTML = '<i class="fas fa-check"></i><span>Comprado</span>';
+        } else {
+            // Desmarcar como comprado
+            productElement.classList.remove('purchased');
+            buttonElement.className = 'btn purchase-toggle btn-not-purchased';
+            buttonElement.innerHTML = '<i class="fas fa-times"></i><span>Não Comprado</span>';
+        }
+        
+        console.log('Estado alterado para:', barcode, !isPurchased);
+    }
+
+
+
+
+    function clearPurchasedStatus() {
+        if (confirm('Deseja limpar o estado de todos os produtos comprados?')) {
+            localStorage.removeItem('purchased_items');
+            fetchProdutosUserLogado(); // Recarregar a lista
+        }
+    }
+
 
     
     </script>
