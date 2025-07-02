@@ -4,6 +4,8 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
+//ESRE FICHEIRO É O CRUD COMPLETO DOS PRODUTOS
+
 // Carregar variáveis de ambiente
 $config = require __DIR__ . '/env.php';
 

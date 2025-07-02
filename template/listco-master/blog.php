@@ -353,7 +353,11 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
                                 <div class="product-price">€${preco.toFixed(2)}</div>
                             </div>
                             <div class="col-lg-1 col-md-1 col-sm-6 col-6 text-center">
-                                <div class="quantity-display">1</div>
+                                <button onclick="removeProductFromAPI(${item.id}, '${item.produto_barcode}')" 
+                                        class="btn btn-sm btn-outline-danger" 
+                                        title="Remover produto">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                             <div class="col-lg-2 col-md-2 col-sm-6 col-6 text-center">
                                 <div class="item-total mb-2">€${subtotal.toFixed(2)}</div>
@@ -378,6 +382,48 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
             alert('Erro ao conectar com a API');
         }
     }
+
+    // Nova função para remover produto individual da API
+    async function removeProductFromAPI(produtoUserId, barcode) {
+        if (!confirm('Tem certeza que deseja remover este produto do carrinho?')) {
+            return;
+        }
+
+        try {
+            // Fazer chamada para a API usando o endpoint correto
+            const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'remove',
+                    produto_user_id: produtoUserId
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Remover também do localStorage de produtos comprados
+                const purchasedItems = JSON.parse(localStorage.getItem('purchased_items') || '{}');
+                delete purchasedItems[barcode];
+                localStorage.setItem('purchased_items', JSON.stringify(purchasedItems));
+
+                // Recarregar a lista de produtos
+                fetchProdutosUserLogado();
+                
+                // Opcional: mostrar mensagem de sucesso
+                console.log('Produto removido com sucesso!');
+            } else {
+                alert('Erro ao remover produto: ' + (result.message || 'Erro desconhecido'));
+            }
+        } catch (error) {
+            console.error('Erro ao remover produto:', error);
+            alert('Erro ao conectar com a API para remover o produto');
+        }
+    }
+
 
     function togglePurchased(barcode) {
         const productElement = document.getElementById(`product-${barcode}`);

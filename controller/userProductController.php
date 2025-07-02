@@ -31,8 +31,7 @@ class UserProductController {
             // Se userId não foi fornecido, usar da sessão
             if ($userId === null) {
                 if (!isset($_SESSION['user_id'])) {
-                    $this->sendResponse(false, 'Utilizador não está logado');
-                    return;
+                    return ['success' => false, 'message' => 'Utilizador não está logado'];
                 }
                 $userId = $_SESSION['user_id'];
             }
@@ -43,11 +42,12 @@ class UserProductController {
             $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($existing) {
-                $this->sendResponse(true, 'Produto já está associado ao utilizador', [
+                return [
+                    'success' => true, 
+                    'message' => 'Produto já está associado ao utilizador',
                     'action' => 'already_exists',
                     'relation_id' => $existing['id']
-                ]);
-                return;
+                ];
             }
 
             // Criar nova relação
@@ -59,15 +59,87 @@ class UserProductController {
             $stmt->execute([$productId, $userId]);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $this->sendResponse(true, 'Produto associado ao utilizador com sucesso', [
+            return [
+                'success' => true, 
+                'message' => 'Produto associado ao utilizador com sucesso',
                 'action' => 'created',
                 'relation_id' => $result['id'],
                 'product_id' => $productId,
                 'user_id' => $userId
-            ]);
+            ];
 
         } catch (PDOException $e) {
-            $this->sendResponse(false, 'Erro ao associar produto ao utilizador: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Erro ao associar produto ao utilizador: ' . $e->getMessage()];
+        }
+    }
+
+    public function createProductAndAssociate($data) {
+        try {
+            // Verificar se utilizador está logado
+            if (!isset($_SESSION['user_id'])) {
+                return ['success' => false, 'message' => 'Utilizador não está logado'];
+            }
+
+            $userId = $_SESSION['user_id'];
+
+            // Validar dados obrigatórios
+            $required = ['barcode', 'name'];
+            foreach ($required as $field) {
+                if (!isset($data[$field]) || empty($data[$field])) {
+                    return ['success' => false, 'message' => "Campo '$field' é obrigatório"];
+                }
+            }
+
+            // Limpar preço
+            $price = $this->cleanPrice($data['price'] ?? '');
+
+            // Verificar se produto já existe
+            $stmt = $this->pdo->prepare("SELECT idproduto FROM produtos WHERE barcode = ?");
+            $stmt->execute([$data['barcode']]);
+            $existingProduct = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($existingProduct) {
+                $productId = $existingProduct['idproduto'];
+                $productAction = 'exists';
+            } else {
+                // Criar novo produto
+                $stmt = $this->pdo->prepare("
+                    INSERT INTO produtos (barcode, nome, marca, categoria, preco, descricao) 
+                    VALUES (?, ?, ?, ?, ?, ?) 
+                    RETURNING idproduto
+                ");
+                $stmt->execute([
+                    $data['barcode'],
+                    $data['name'],
+                    $data['brand'] ?? 'Marca não identificada',
+                    $data['category'] ?? 'Categoria não identificada',
+                    $price,
+                    $data['description'] ?? ''
+                ]);
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $productId = $result['idproduto'];
+                $productAction = 'created';
+            }
+
+            // Associar produto ao utilizador
+            $userResult = $this->addProductToUser($productId, $userId);
+
+            return [
+                'success' => true,
+                'message' => 'Produto processado e associado com sucesso',
+                'product' => [
+                    'id' => $productId,
+                    'barcode' => $data['barcode'],
+                    'name' => $data['name'],
+                    'action' => $productAction
+                ],
+                'user_relation' => $userResult
+            ];
+
+        } catch (PDOException $e) {
+            return ['success' => false, 'message' => 'Erro na base de dados: ' . $e->getMessage()];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Erro interno: ' . $e->getMessage()];
         }
     }
 
@@ -149,6 +221,15 @@ class UserProductController {
         }
     }
 
+    private function cleanPrice($price) {
+        if (empty($price) || $price === 'Preço não disponível') {
+            return null;
+        }
+
+        $cleanPrice = trim(str_replace(['€', ' '], '', $price));
+        return is_numeric($cleanPrice) ? floatval($cleanPrice) : null;
+    }
+
     private function sendResponse($success, $message, $data = null) {
         $response = [
             'success' => $success,
@@ -163,53 +244,90 @@ class UserProductController {
     }
 }
 
+// Função para obter dados da requisição (POST ou JSON)
+function getRequestData() {
+    // Primeiro, tentar obter dados do $_POST
+    if (!empty($_POST)) {
+        return $_POST;
+    }
+    
+    // Se não há $_POST, tentar JSON
+    $jsonInput = file_get_contents('php://input');
+    if (!empty($jsonInput)) {
+        $jsonData = json_decode($jsonInput, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $jsonData;
+        }
+    }
+    
+    return [];
+}
+
 // Processar requisições
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $controller = new UserProductController($config);
     
-    if (!isset($_POST['action'])) {
+    // Obter dados da requisição
+    $data = getRequestData();
+    
+    if (empty($data)) {
+        echo json_encode(['success' => false, 'message' => 'Nenhum dado recebido']);
+        exit;
+    }
+    
+    if (!isset($data['action'])) {
         echo json_encode(['success' => false, 'message' => 'Ação não especificada']);
         exit;
     }
 
-    $action = $_POST['action'];
+    $action = $data['action'];
 
     switch ($action) {
         case 'add_to_user':
-            if (!isset($_POST['product_id'])) {
-                echo json_encode(['success' => false, 'message' => 'ID do produto é obrigatório']);
-                exit;
+            // Modo completo: criar produto e associar ao utilizador
+            if (isset($data['barcode']) && isset($data['name'])) {
+                $result = $controller->createProductAndAssociate($data);
+                echo json_encode($result);
+            } else if (isset($data['product_id'])) {
+                // Modo simples: apenas associar produto existente
+                $userId = isset($data['user_id']) ? $data['user_id'] : null;
+                $result = $controller->addProductToUser($data['product_id'], $userId);
+                echo json_encode($result);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Dados insuficientes (barcode+name ou product_id)']);
             }
-            
-            $userId = isset($_POST['user_id']) ? $_POST['user_id'] : null;
-            $controller->addProductToUser($_POST['product_id'], $userId);
             break;
 
         case 'get_user_products':
-            $userId = isset($_POST['user_id']) ? $_POST['user_id'] : null;
+            $userId = isset($data['user_id']) ? $data['user_id'] : null;
             $controller->getUserProducts($userId);
             break;
 
         case 'remove_from_user':
-            if (!isset($_POST['product_id'])) {
+            if (!isset($data['product_id'])) {
                 echo json_encode(['success' => false, 'message' => 'ID do produto é obrigatório']);
                 exit;
             }
             
-            $userId = isset($_POST['user_id']) ? $_POST['user_id'] : null;
-            $controller->removeProductFromUser($_POST['product_id'], $userId);
+            $userId = isset($data['user_id']) ? $data['user_id'] : null;
+            $controller->removeProductFromUser($data['product_id'], $userId);
             break;
 
         case 'get_product_users':
-            if (!isset($_POST['product_id'])) {
+            if (!isset($data['product_id'])) {
                 echo json_encode(['success' => false, 'message' => 'ID do produto é obrigatório']);
                 exit;
             }
-            $controller->getProductUsers($_POST['product_id']);
+            $controller->getProductUsers($data['product_id']);
             break;
 
         default:
-            echo json_encode(['success' => false, 'message' => 'Ação inválida']);
+            echo json_encode(['success' => false, 'message' => 'Ação inválida: ' . $action]);
             break;
     }
 } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {

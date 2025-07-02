@@ -6,7 +6,6 @@ $is_logged_in = isset($_SESSION['logged_in']) && $_SESSION['logged_in'];
 $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
 ?>
 
-
 <!doctype html>
 <html class="no-js" lang="pt">
 <head>
@@ -35,7 +34,6 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     <link rel="stylesheet" href="styleqrcode.css">
     <link rel="stylesheet" href="stylesblock.css">
 
-    
     <!-- Quagga.js for barcode scanning -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
@@ -71,7 +69,6 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
         </div>
     </div>
     <?php endif; ?>
-    
     
     <!-- Preloader Start -->
     <?php include("cabecalho.php"); ?>
@@ -164,68 +161,57 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     </div>
 
     <script>
-
-       // Adiciona este script no index.php e outras páginas que precisam de autenticação
-
-async function checkUserSession() {
-    try {
-        const formData = new FormData();
-        formData.append('action', 'check_session');
-        
-        const response = await fetch('/site/controller/controllerUser.php', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success && data.logged_in) {
-            // Utilizador está logado
-            console.log('Utilizador logado:', data.user.email);
-            showUserInfo(data.user);
-        } else {
-            // Utilizador não está logado - não fazer nada (página é pública)
-            console.log('Utilizador não está logado');
-            // Não redirecionar
+        // Verificação de sessão de utilizador
+        async function checkUserSession() {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'check_session');
+                
+                const response = await fetch('/site/controller/controllerUser.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.logged_in) {
+                    console.log('Utilizador logado:', data.user.email);
+                    showUserInfo(data.user);
+                } else {
+                    console.log('Utilizador não está logado');
+                }
+            } catch (error) {
+                console.error('Erro ao verificar sessão:', error);
+            }
         }
-    } catch (error) {
-        console.error('Erro ao verificar sessão:', error);
-    }
-}
 
-function showUserInfo() {
-    // Exemplo: atualiza um div com info do utilizador
-    const userDiv = document.getElementById("user-info");
-    if (userDiv) userDiv.innerText = "Sessão iniciada.";
-  }
-
-
-
-async function logout() {
-    try {
-        const formData = new FormData();
-        formData.append('action', 'logout');
-        
-        const response = await fetch('/site/controller/controllerUser.php', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            alert('Logout realizado com sucesso!');
-            window.location.href = '/site/template/listco-master/login.php';
+        function showUserInfo() {
+            const userDiv = document.getElementById("user-info");
+            if (userDiv) userDiv.innerText = "Sessão iniciada.";
         }
-    } catch (error) {
-        console.error('Erro no logout:', error);
-    }
-}
 
-// Verificar sessão quando a página carregar
-document.addEventListener('DOMContentLoaded', function() {
-    checkUserSession();
-});
+        async function logout() {
+            try {
+                const formData = new FormData();
+                formData.append('action', 'logout');
+                
+                const response = await fetch('/site/controller/controllerUser.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Logout realizado com sucesso!');
+                    window.location.href = '/site/template/listco-master/login.php';
+                }
+            } catch (error) {
+                console.error('Erro no logout:', error);
+            }
+        }
+
+        // Classe principal do leitor de códigos de barras
         class BarcodeReader {
             constructor() {
                 this.isScanning = false;
@@ -301,9 +287,8 @@ document.addEventListener('DOMContentLoaded', function() {
             startScanner() {
                 if (this.isScanning) return;
 
-                // Limpar qualquer instância anterior do Quagga
+                console.log('🎥 Iniciando scanner...');
                 this.cleanupQuagga();
-
                 this.showStatusMessage('A inicializar câmera...', 'info');
 
                 Quagga.init({
@@ -338,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     locate: true
                 }, (err) => {
                     if (err) {
-                        console.error('Erro ao inicializar scanner:', err);
+                        console.error('❌ Erro ao inicializar scanner:', err);
                         this.showStatusMessage('Erro ao acessar a câmera. Verifique as permissões.', 'error');
                         this.resetButtons();
                         return;
@@ -352,18 +337,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         this.scanLine.style.display = 'block';
                         this.showStatusMessage('Scanner ativo. Mantenha o código de barras centrado e estável.', 'success');
                         
-                        // Reset detection count
+                        console.log('✅ Scanner iniciado com sucesso');
                         this.detectionCount = {};
                     } catch (startError) {
-                        console.error('Erro ao iniciar Quagga:', startError);
+                        console.error('❌ Erro ao iniciar Quagga:', startError);
                         this.showStatusMessage('Erro ao iniciar o scanner.', 'error');
                         this.resetButtons();
                     }
                 });
 
-                // Remover listeners anteriores para evitar duplicação
+                // Remover listeners anteriores
                 Quagga.offDetected();
                 
+                // Adicionar listener para detecção
                 Quagga.onDetected((data) => {
                     const code = data.codeResult.code;
                     const confidence = data.codeResult.decodedCodes.reduce((sum, code) => sum + (code.error || 0), 0) / data.codeResult.decodedCodes.length;
@@ -377,41 +363,36 @@ document.addEventListener('DOMContentLoaded', function() {
             stopScanner() {
                 if (!this.isScanning) return;
 
+                console.log('🛑 Parando scanner...');
+                
                 try {
-                    // Parar o Quagga completamente
                     Quagga.stop();
-                    
-                    // Limpar completamente
                     this.cleanupQuagga();
                     
-                    // Reset estados
                     this.isScanning = false;
                     this.resetButtons();
                     this.barcodeResult.style.display = 'none';
                     this.scanLine.style.display = 'none';
                     this.showStatusMessage('Scanner parado', 'info');
                     
-                    // Reset detection states
                     this.detectionCount = {};
                     this.lastScannedCode = null;
                     
+                    console.log('✅ Scanner parado com sucesso');
+                    
                 } catch (error) {
-                    console.error('Erro ao parar scanner:', error);
-                    // Forçar reset mesmo com erro
+                    console.error('❌ Erro ao parar scanner:', error);
                     this.forceReset();
                 }
             }
 
             cleanupQuagga() {
                 try {
-                    // Remover todos os event listeners
                     Quagga.offDetected();
                     Quagga.offProcessed();
                     
-                    // Limpar o canvas/video do container
                     const container = document.querySelector('#interactive');
                     if (container) {
-                        // Remover elementos de vídeo e canvas criados pelo Quagga
                         const videos = container.querySelectorAll('video');
                         const canvases = container.querySelectorAll('canvas');
                         
@@ -426,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         canvases.forEach(canvas => canvas.remove());
                     }
                 } catch (error) {
-                    console.log('Erro na limpeza do Quagga (não crítico):', error);
+                    console.log('⚠️ Erro na limpeza do Quagga (não crítico):', error);
                 }
             }
 
@@ -436,7 +417,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             forceReset() {
-                // Reset forçado em caso de erro
                 this.isScanning = false;
                 this.resetButtons();
                 this.barcodeResult.style.display = 'none';
@@ -444,7 +424,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.detectionCount = {};
                 this.lastScannedCode = null;
                 
-                // Limpar container completamente
                 const container = document.querySelector('#interactive');
                 if (container) {
                     container.innerHTML = '';
@@ -457,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const now = Date.now();
                 
                 if (!this.isValidBarcode(barcode)) {
-                    console.log(`Código inválido rejeitado: ${barcode}`);
+                    console.log(`❌ Código inválido rejeitado: ${barcode}`);
                     return;
                 }
                 
@@ -551,54 +530,71 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.barcodeResult.innerHTML = `✅ Código confirmado: <strong>${barcode}</strong>`;
                 this.barcodeResult.style.display = 'block';
                 
+                // Verificar se já foi escaneado
                 if (this.products.some(p => p.barcode === barcode)) {
-                    this.showStatusMessage('Produto já escaneado!', 'info');
+                    this.showStatusMessage('ℹ️ Produto já foi escaneado anteriormente!', 'info');
                     return;
                 }
 
                 this.showLoading(true);
-                this.showStatusMessage('A buscar informações do produto...', 'info');
+                this.showStatusMessage('🔍 Buscando informações do produto...', 'info');
+                
+                let productInfo = null;
                 
                 try {
-                    const productInfo = await this.getProductInfo(barcode);
+                    // Buscar informações do produto
+                    productInfo = await this.getProductInfo(barcode);
+                    console.log('📦 Informações do produto:', productInfo);
+                    
+                    // Adicionar à lista local primeiro
                     this.addProduct(productInfo);
                     
-                    // Guardar automaticamente na base de dados
-                    await this.saveProductToDatabase(productInfo);
+                    // Mostrar que foi adicionado localmente
+                    this.showStatusMessage('📱 Produto adicionado à lista. Guardando na base de dados...', 'info');
                     
-                    this.showStatusMessage('Produto adicionado e guardado na base de dados!', 'success');
                 } catch (error) {
-                    console.error('Erro ao buscar produto:', error);
-                    this.showStatusMessage('Erro ao buscar informações. Produto adicionado com dados básicos.', 'error');
+                    console.error('❌ Erro ao buscar informações:', error);
                     
-                    const basicProduct = {
+                    // Criar produto básico mesmo se não encontrar informações
+                    productInfo = {
                         barcode: barcode,
-                        name: 'Produto não identificado',
+                        name: `Produto ${barcode.slice(-4)}`,
                         price: 'Preço não disponível',
                         brand: 'Marca não identificada',
                         category: 'Categoria não identificada',
-                        source: 'Local'
+                        description: 'Produto não identificado pelas APIs',
+                        source: 'Scanner Local',
+                        scannedAt: new Date().toLocaleString('pt-PT')
                     };
                     
-                    this.addProduct(basicProduct);
+                    this.addProduct(productInfo);
+                    this.showStatusMessage('⚠️ Produto adicionado com dados básicos. Tentando guardar...', 'warning');
+                }
+                
+                // Tentar guardar na base de dados
+                try {
+                productInfo.action = "saveUserProduct";  // 🔧 <== Linha nova que resolve o erro
+
+                const saveResult = await this.saveProductToDatabase(productInfo);
+                
+                if (saveResult && saveResult.success === false) {
+                    console.log('⚠️ Produto mantido na lista local apesar do erro na base de dados');
+                }
                     
-                    // Tentar guardar mesmo com dados básicos
-                    try {
-                        await this.saveProductToDatabase(basicProduct);
-                    } catch (saveError) {
-                        console.error('Erro ao guardar produto básico:', saveError);
-                    }
+                } catch (saveError) {
+                    console.error('❌ Erro crítico ao guardar:', saveError);
+                    this.showStatusMessage('💾 Produto mantido na lista local. Erro ao sincronizar com base de dados.', 'warning');
                 } finally {
                     this.showLoading(false);
                 }
             }
 
             async getProductInfo(barcode) {
-                console.log(`Buscando informações para código: ${barcode}`);
+                console.log(`🔍 Buscando informações para código: ${barcode}`);
                 
                 if (this.localProducts[barcode]) {
                     const product = this.localProducts[barcode];
-                    console.log('Produto encontrado na base local:', product);
+                    console.log('✅ Produto encontrado na base local:', product);
                     return {
                         barcode: barcode,
                         name: product.name,
@@ -621,7 +617,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     try {
                         const result = await apiCall();
                         if (result && result.found) {
-                            console.log('Produto encontrado via API:', result);
+                            console.log('✅ Produto encontrado via API:', result);
                             return {
                                 ...result,
                                 barcode: barcode,
@@ -629,12 +625,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             };
                         }
                     } catch (error) {
-                        console.log('API falhou, tentando próxima...', error.message);
+                        console.log('⚠️ API falhou, tentando próxima...', error.message);
                         continue;
                     }
                 }
 
-                console.log('Produto não encontrado, usando dados básicos');
+                console.log('⚠️ Produto não encontrado, usando dados básicos');
                 return {
                     barcode: barcode,
                     name: this.generateProductName(barcode),
@@ -811,11 +807,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="product-detail">
                                 <strong>Escaneado:</strong> ${product.scannedAt}
                             </div>
-                            <div class="product-actions" style="margin-top: 15px; text-align: center;">
-                                <button class="add-to-cart-btn" onclick="addToCart('${product.barcode}', '${product.name.replace(/'/g, "\\'")}', '${product.price}', '${product.brand.replace(/'/g, "\\'")}')">
-                                    Adicionar +
-                                </button>
-                            </div>
                         </div>
                     </div>
                 `).join('');
@@ -829,72 +820,210 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            async saveProductToDatabase(product) {
+            cleanPriceForDatabase(price) {
+                if (!price || typeof price !== 'string') {
+                    return '0.00';
+                }
+                
+                // Remover símbolos de moeda e espaços
+                let cleanPrice = price.replace(/[€$£¥₹]/g, '').trim();
+                
+                // Substituir vírgula por ponto para formato decimal
+                cleanPrice = cleanPrice.replace(',', '.');
+                
+                // Extrair apenas números e ponto decimal
+                cleanPrice = cleanPrice.match(/[\d.]+/);
+                
+                if (!cleanPrice) {
+                    return '0.00';
+                }
+                
+                // Converter para float e formatar com 2 casas decimais
+                const numericPrice = parseFloat(cleanPrice[0]);
+                
+                if (isNaN(numericPrice)) {
+                    return '0.00';
+                }
+                
+                return numericPrice.toFixed(2);
+            }
+
+            async saveProductToDatabase(productData) {
                 try {
-                    // Preparar dados para enviar
-                    const productData = {
-                        barcode: product.barcode,
-                        name: product.name || 'Produto não identificado',
-                        brand: product.brand || 'Marca não identificada',
-                        category: product.category || 'Categoria não identificada',
-                        price: product.price || 'Preço não disponível'
-                    };
-                    
-                    const response = await fetch('http://localhost/site/controller/barcodeApi.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(productData)
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    if (!productData || !productData.name || !productData.price) {
+                        throw new Error("Dados do produto incompletos");
                     }
 
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        console.log('✅ Produto processado pela API:', result);
-                        
-                        // Mensagem diferente baseada na ação
-                        if (result.product && result.product.action === 'updated') {
-                            this.showStatusMessage('📝 Produto atualizado e associado!', 'success');
-                        } else {
-                            this.showStatusMessage('💾 Produto guardado e associado!', 'success');
+                    console.log('📤 Enviando dados para a base de dados:', productData);
+
+                    // Criar FormData em vez de JSON para compatibilidade com PHP $_POST
+                    const formData = new FormData();
+                    formData.append('action', 'add_to_user');
+                    formData.append('barcode', productData.barcode);
+                    formData.append('name', productData.name);
+                    formData.append('brand', productData.brand || 'Marca não identificada');
+                    formData.append('category', productData.category || 'Categoria não identificada');
+                    formData.append('price', this.cleanPriceForDatabase(productData.price));
+                    formData.append('description', productData.description || '');
+                    formData.append('source', productData.source || 'Scanner');
+
+                    // Primeira tentativa: usar barcodeApi.php
+                    try {
+                        const response = await fetch('../../controller/barcodeApi.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP Error: ${response.status}`);
                         }
-                    } else {
-                        throw new Error(result.message || 'Erro desconhecido da API');
+
+                        const result = await response.json();
+                        console.log('📥 Resposta da API:', result);
+
+                        if (result.success) {
+                            this.showStatusMessage('💾 Produto salvo com sucesso na base de dados!', 'success');
+                            return result;
+                        } else {
+                            throw new Error(result.message || 'Erro na API');
+                        }
+
+                    } catch (apiError) {
+                        console.warn('⚠️ Erro na barcodeApi.php, tentando controlador direto:', apiError);
+                        
+                        // Segunda tentativa: usar controlador direto
+                        try {
+                            // Primeiro criar/atualizar o produto
+                            const productFormData = new FormData();
+                            productFormData.append('action', 'create_or_update');
+                            productFormData.append('barcode', productData.barcode);
+                            productFormData.append('name', productData.name);
+                            productFormData.append('brand', productData.brand || 'Marca não identificada');
+                            productFormData.append('category', productData.category || 'Categoria não identificada');
+                            productFormData.append('price', this.cleanPriceForDatabase(productData.price));
+
+                            const productResponse = await fetch('../../controller/productController.php', {
+                                method: 'POST',
+                                body: productFormData
+                            });
+
+                            if (!productResponse.ok) {
+                                throw new Error(`Erro HTTP no productController: ${productResponse.status}`);
+                            }
+
+                            const productResult = await productResponse.json();
+                            console.log('📦 Resposta do productController:', productResult);
+
+                            if (!productResult.success) {
+                                throw new Error(productResult.message || 'Erro ao criar produto');
+                            }
+
+                            // Depois associar ao utilizador
+                            const userFormData = new FormData();
+                            userFormData.append('action', 'add_to_user');
+                            userFormData.append('product_id', productResult.product_id);
+
+                            const userResponse = await fetch('../../controller/userProductController.php', {
+                                method: 'POST',
+                                body: userFormData
+                            });
+
+                            if (!userResponse.ok) {
+                                throw new Error(`Erro HTTP no userProductController: ${userResponse.status}`);
+                            }
+
+                            const userResult = await userResponse.json();
+                            console.log('👤 Resposta do userProductController:', userResult);
+
+                            if (userResult.success) {
+                                this.showStatusMessage('💾 Produto salvo e associado com sucesso!', 'success');
+                                return {
+                                    success: true,
+                                    message: 'Produto salvo via controlador direto',
+                                    product: productResult,
+                                    userRelation: userResult
+                                };
+                            } else {
+                                throw new Error(userResult.message || 'Erro ao associar produto ao utilizador');
+                            }
+
+                        } catch (directError) {
+                            console.error('❌ Erro também no controlador direto:', directError);
+                            
+                            // Terceira tentativa: modo de compatibilidade com JSON
+                            try {
+                                const jsonPayload = {
+                                    action: 'add_to_user',
+                                    barcode: productData.barcode,
+                                    name: productData.name,
+                                    brand: productData.brand || 'Marca não identificada',
+                                    category: productData.category || 'Categoria não identificada',
+                                    price: this.cleanPriceForDatabase(productData.price),
+                                    description: productData.description || '',
+                                    source: productData.source || 'Scanner'
+                                };
+
+                                const jsonResponse = await fetch('../../controller/userProductController.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify(jsonPayload)
+                                });
+
+                                if (!jsonResponse.ok) {
+                                    throw new Error(`Erro HTTP JSON: ${jsonResponse.status}`);
+                                }
+
+                                const jsonResult = await jsonResponse.json();
+                                console.log('🔄 Resposta JSON:', jsonResult);
+
+                                if (jsonResult.success) {
+                                    this.showStatusMessage('💾 Produto salvo via JSON!', 'success');
+                                    return jsonResult;
+                                } else {
+                                    throw new Error(jsonResult.message || 'Erro no modo JSON');
+                                }
+
+                            } catch (jsonError) {
+                                console.error('❌ Todas as tentativas falharam:', jsonError);
+                                this.showStatusMessage('⚠️ Produto mantido localmente. Erro ao sincronizar com base de dados.', 'warning');
+                                
+                                return {
+                                    success: false,
+                                    message: `Erro ao salvar: ${jsonError.message}`,
+                                    keepLocal: true
+                                };
+                            }
+                        }
                     }
-                    
+
                 } catch (error) {
-                    console.error('❌ Erro na API de Barcode:', error);
-                    this.showStatusMessage('⚠️ Erro ao guardar produto: ' + error.message, 'error');
+                    console.error('❌ Erro crítico no saveProductToDatabase:', error);
+                    this.showStatusMessage('💾 Produto mantido na lista local.', 'warning');
                     
-                    // Log detalhado para debug
-                    console.error('Detalhes do erro:', {
+                    return {
+                        success: false,
                         message: error.message,
-                        product: product
-                    });
+                        keepLocal: true
+                    };
                 }
             }
         }
 
-        // Função para adicionar produto ao carrinho
+        // Funções globais para o carrinho (sem usar localStorage)
+        let shoppingCart = [];
+
         function addToCart(barcode, name, price, brand) {
-            // Obter carrinho existente do localStorage ou criar novo
-            let cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
-            
             // Verificar se produto já existe no carrinho
-            const existingItem = cart.find(item => item.barcode === barcode);
+            const existingItem = shoppingCart.find(item => item.barcode === barcode);
             
             if (existingItem) {
                 existingItem.quantity += 1;
                 showCartMessage(`Quantidade de "${name}" aumentada para ${existingItem.quantity}`, 'success');
             } else {
                 // Adicionar novo produto
-                cart.push({
+                shoppingCart.push({
                     barcode: barcode,
                     name: name,
                     price: price,
@@ -905,14 +1034,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 showCartMessage(`"${name}" adicionado ao carrinho!`, 'success');
             }
             
-            // Guardar carrinho atualizado
-            localStorage.setItem('shopping_cart', JSON.stringify(cart));
-            
-            // Atualizar contador do carrinho (se existir)
+            // Atualizar contador do carrinho
             updateCartCounter();
         }
 
-        // Função para mostrar mensagens do carrinho
         function showCartMessage(message, type = 'success') {
             const statusMessage = document.getElementById('status-message');
             if (statusMessage) {
@@ -926,10 +1051,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Função para atualizar contador do carrinho
         function updateCartCounter() {
-            const cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalItems = shoppingCart.reduce((sum, item) => sum + item.quantity, 0);
             
             // Atualizar texto do botão "Ver carrinho" se existir
             const cartButton = document.querySelector('.btn');
@@ -941,7 +1064,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Inicializar aplicação quando o DOM estiver pronto
         document.addEventListener('DOMContentLoaded', () => {
             new BarcodeReader();
-            updateCartCounter(); // Atualizar contador ao carregar página
+            updateCartCounter();
         });
     </script>
 </body>

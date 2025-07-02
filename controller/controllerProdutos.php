@@ -9,7 +9,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 // Carregar variáveis de ambiente
 $config = require __DIR__ . '/env.php';
 
-
+//ESTE FICHEIRO É PARA A LEITURA DE PRODUTOS
 
 class ProductController {
     private $pdo;

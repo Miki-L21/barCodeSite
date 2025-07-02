@@ -20,6 +20,7 @@ class ProdutoUserController {
         }
     }
 
+
     public function getProdutosUserLogado() {
         if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in'] || !isset($_SESSION['user_id'])) {
             $this->sendResponse(false, 'Utilizador não está logado');
