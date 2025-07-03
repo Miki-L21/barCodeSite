@@ -1,15 +1,19 @@
 <?php
-session_start(); // Iniciar sessão
+session_start();
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Carregar variáveis de ambiente
-$config = require __DIR__ . '/env.php';
+// Handle preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
 
-//ESTE FICHEIRO É PARA A LEITURA DE PRODUTOS
+// Carregar configuração da base de dados
+$config = require __DIR__ . '/env.php';
 
 class ProductController {
     private $pdo;
@@ -23,6 +27,7 @@ class ProductController {
             );
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
+            error_log("ERRO CONEXÃO BD: " . $e->getMessage());
             $this->sendResponse(false, 'Erro ao conectar à base de dados: ' . $e->getMessage());
             exit;
         }
@@ -35,12 +40,15 @@ class ProductController {
             $stmt->execute();
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            error_log("PRODUTOS ENCONTRADOS: " . count($products));
+
             $this->sendResponse(true, 'Produtos encontrados com sucesso', [
                 'products' => $products,
                 'total' => count($products)
             ]);
 
         } catch (PDOException $e) {
+            error_log("ERRO AO BUSCAR PRODUTOS: " . $e->getMessage());
             $this->sendResponse(false, 'Erro ao buscar produtos: ' . $e->getMessage());
         }
     }
@@ -66,42 +74,6 @@ class ProductController {
         }
     }
 
-    // Buscar produtos por categoria
-    public function getProductsByCategory($category) {
-        try {
-            $stmt = $this->pdo->prepare("SELECT idproduto, barcode, nome, marca, categoria, preco FROM produtos WHERE categoria = ? ORDER BY nome");
-            $stmt->execute([$category]);
-            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            $this->sendResponse(true, 'Produtos da categoria encontrados com sucesso', [
-                'products' => $products,
-                'category' => $category,
-                'total' => count($products)
-            ]);
-
-        } catch (PDOException $e) {
-            $this->sendResponse(false, 'Erro ao buscar produtos por categoria: ' . $e->getMessage());
-        }
-    }
-
-    // Buscar produtos por marca
-    public function getProductsByBrand($brand) {
-        try {
-            $stmt = $this->pdo->prepare("SELECT idproduto, barcode, nome, marca, categoria, preco FROM produtos WHERE marca = ? ORDER BY nome");
-            $stmt->execute([$brand]);
-            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            $this->sendResponse(true, 'Produtos da marca encontrados com sucesso', [
-                'products' => $products,
-                'brand' => $brand,
-                'total' => count($products)
-            ]);
-
-        } catch (PDOException $e) {
-            $this->sendResponse(false, 'Erro ao buscar produtos por marca: ' . $e->getMessage());
-        }
-    }
-
     // Buscar produto por código de barras
     public function getProductByBarcode($barcode) {
         try {
@@ -123,8 +95,6 @@ class ProductController {
         }
     }
 
-
-
     private function sendResponse($success, $message, $data = null) {
         $response = [
             'success' => $success,
@@ -140,67 +110,59 @@ class ProductController {
 }
 
 // Processar requisições
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Criar instância do controller
+try {
     $controller = new ProductController($config);
     
-    // Verificar se a ação foi especificada
-    if (!isset($_POST['action'])) {
-        echo json_encode(['success' => false, 'message' => 'Ação não especificada']);
-        exit;
-    }
-
-    $action = $_POST['action'];
-
-    switch ($action) {
-        case 'get_all':
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        // Para requisições GET, verificar ação
+        if (isset($_GET['action']) && $_GET['action'] === 'getAll') {
             $controller->getAllProducts();
-            break;
+        } else {
+            $controller->getAllProducts(); // Default para todos os produtos
+        }
+    } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Para requisições POST
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        if (!$input && isset($_POST['action'])) {
+            // Fallback para POST tradicional
+            $action = $_POST['action'];
+        } else {
+            $action = $input['action'] ?? 'get_all';
+        }
 
-        case 'get_by_id':
-            if (!isset($_POST['id'])) {
-                echo json_encode(['success' => false, 'message' => 'ID do produto é obrigatório']);
-                exit;
-            }
-            $controller->getProductById($_POST['id']);
-            break;
+        switch ($action) {
+            case 'get_all':
+                $controller->getAllProducts();
+                break;
 
-        case 'get_by_category':
-            if (!isset($_POST['category'])) {
-                echo json_encode(['success' => false, 'message' => 'Categoria é obrigatória']);
-                exit;
-            }
-            $controller->getProductsByCategory($_POST['category']);
-            break;
+            case 'get_by_id':
+                $id = $input['id'] ?? $_POST['id'] ?? null;
+                if (!$id) {
+                    echo json_encode(['success' => false, 'message' => 'ID do produto é obrigatório']);
+                    exit;
+                }
+                $controller->getProductById($id);
+                break;
 
-        case 'get_by_brand':
-            if (!isset($_POST['brand'])) {
-                echo json_encode(['success' => false, 'message' => 'Marca é obrigatória']);
-                exit;
-            }
-            $controller->getProductsByBrand($_POST['brand']);
-            break;
+            case 'get_by_barcode':
+                $barcode = $input['barcode'] ?? $_POST['barcode'] ?? null;
+                if (!$barcode) {
+                    echo json_encode(['success' => false, 'message' => 'Código de barras é obrigatório']);
+                    exit;
+                }
+                $controller->getProductByBarcode($barcode);
+                break;
 
-        case 'get_by_barcode':
-            if (!isset($_POST['barcode'])) {
-                echo json_encode(['success' => false, 'message' => 'Código de barras é obrigatório']);
-                exit;
-            }
-            $controller->getProductByBarcode($_POST['barcode']);
-            break;
-
-        default:
-            echo json_encode(['success' => false, 'message' => 'Ação inválida']);
-            break;
+            default:
+                echo json_encode(['success' => false, 'message' => 'Ação inválida']);
+                break;
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Método não permitido']);
     }
-} else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Para requisições GET, apenas retornar todos os produtos
-    $controller = new ProductController($config);
-    $controller->getAllProducts();
-} else {
-    echo json_encode(['success' => false, 'message' => 'Método não permitido']);
+} catch (Exception $e) {
+    error_log("ERRO GERAL: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Erro interno: ' . $e->getMessage()]);
 }
-
-
-
 ?>

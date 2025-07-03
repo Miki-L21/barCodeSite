@@ -145,6 +145,8 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     .properties.hidden-initially {
         display: none !important;
     }
+
+    
 </style>
 </head>
 <body>
@@ -239,6 +241,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
                     <div class="row">
                         <div class="col-12">
                             <div id="products-container" style="display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 20px;"></div>
+
                         </div> 
                     </div>
                     
@@ -308,188 +311,323 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
     <!-- Jquery Plugins, main Jquery -->	
     <script src="./assets/js/plugins.js"></script>
     <script src="./assets/js/main.js"></script>
-        <script>
-            async function carregarProdutos() {
-        try {
-            const response = await fetch('http://localhost/site/controller/controllerProdutos.php?action=getAll');
-            const json = await response.json();
+
+    <script>
+
+        async function adicionarProduto(produtoId) {
+    try {
+        console.log(`=== ADICIONAR PRODUTO ===`);
+        console.log(`ID recebido: ${produtoId} (tipo: ${typeof produtoId})`);
+        
+        // Validar ID
+        if (!produtoId || produtoId === null || produtoId === undefined) {
+            console.error('❌ ID inválido:', produtoId);
+            alert('Erro: ID do produto é inválido');
+            return;
+        }
+        
+        // Converter para número
+        const produtoIdNum = parseInt(produtoId);
+        if (isNaN(produtoIdNum) || produtoIdNum <= 0) {
+            console.error('❌ ID não é um número válido:', produtoId);
+            alert('Erro: ID do produto deve ser um número válido');
+            return;
+        }
+        
+        const requestData = {
+            produto_id: produtoIdNum
+        };
+        
+        console.log('📤 Enviando dados:', requestData);
+        
+        // CAMINHO CORRIGIDO - removido 'controller/' do caminho
+        const response = await fetch('../../controller/apiAddProduto.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        console.log('📡 Status da resposta:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('📥 Resposta recebida:', result);
+        
+        if (result.success) {
+            alert('✅ Produto adicionado com sucesso!');
+            updateButtonState(produtoIdNum, true);
+        } else {
+            alert('❌ Erro: ' + (result.message || 'Erro desconhecido'));
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro na requisição:', error);
+        alert('❌ Erro de conexão: ' + error.message);
+    }
+}
+
+// Função para atualizar estado do botão
+function updateButtonState(produtoId, added) {
+    const button = document.querySelector(`[data-produto-id="${produtoId}"]`);
+    if (button) {
+        if (added) {
+            button.style.backgroundColor = '#28a745';
+            button.innerHTML = '<i class="fas fa-check"></i> Adicionado';
+            button.disabled = true;
+        } else {
+            button.style.backgroundColor = '#6f42c1';
+            button.innerHTML = '<i class="fas fa-plus"></i> Adicionar';
+            button.disabled = false;
+        }
+    }
+}
+
+async function carregarProdutos() {
+    try {
+        console.log('🔄 Carregando produtos...');
+        
+        // CAMINHO CORRIGIDO - removido 'controller/' do caminho
+        const response = await fetch('../../controller/controllerProdutos.php?action=getAll');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const json = await response.json();
+        console.log('📥 Resposta da API:', json);
+        
+        if (json.success) {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
             
-
-
-            if (json.success) {
-                const container = document.getElementById('products-container');
+            if (json.data && json.data.products && json.data.products.length > 0) {
                 json.data.products.forEach(produto => {
+                    console.log('📦 Processando produto:', produto);
+                    
+                    const produtoId = produto.idproduto;
+                    
+                    if (!produtoId) {
+                        console.warn('⚠️ Produto sem ID:', produto);
+                        return;
+                    }
+                    
                     const card = document.createElement('div');
                     card.classList.add('properties', 'properties2', 'mb-30');
-
+                    
                     card.innerHTML = `
                         <div class="properties__card">
                             <div class="properties__img overlay1">
                                 <img src="assets/img/gallery/properties1.png" alt="">
                                 <div class="img-text">
-                                    <span>€${produto.preco}</span>
-                                    
+                                    <span>€${produto.preco || '0.00'}</span>
                                 </div>
                                 <div class="icon">
                                     <img src="assets/img/gallery/categori_icon1.png" alt="">
                                 </div>
                             </div>
                             <div class="properties__caption">
-                                <h3>${produto.nome}</h3>
-                                <p>${produto.marca}</p>
+                                <h3>${produto.nome || 'Produto sem nome'}</h3>
+                                <p>${produto.marca || 'Marca não especificada'}</p>
                             </div>
                             <div class="properties__footer">
                                 <div class="restaurant-name">
                                     <img src="assets/img/gallery/restaurant-icon.png" alt="" width="20">
-                                    <h4>${produto.categoria}</h4>
+                                    <h4>${produto.categoria || 'Categoria não especificada'}</h4>
                                 </div>
-                                <div class="heart">
-                                    <img src="assets/img/gallery/heart1.png" alt="" width="20">
+                               
+                                <div class="add-button-container">
+                                    <button class="btn-adicionar" 
+                                            data-produto-id="${produtoId}" 
+                                            onclick="adicionarProduto(${produtoId})" 
+                                            style="background-color: #6f42c1; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.3s;">
+                                        <i class="fas fa-plus"></i> Adicionar
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     `;
-
+                    
                     container.appendChild(card);
                 });
+                
+                console.log(`✅ ${json.data.products.length} produtos carregados`);
+                
+                // Reinicializar paginação
+                setTimeout(() => {
+                    if (typeof initializeProducts === 'function') {
+                        initializeProducts();
+                    }
+                }, 100);
+                
             } else {
-                   alert('Erro: ' + json.message);
+                container.innerHTML = '<div class="no-results"><p>Nenhum produto encontrado.</p></div>';
             }
+            
+        } else {
+            console.error('❌ Erro na API:', json.message);
+            alert('❌ Erro ao carregar produtos: ' + json.message);
+        }
 
-        } catch (err) {
-            console.error('Erro ao buscar produtos:', err);
-            alert('Erro ao conectar com a API');
+    } catch (error) {
+        console.error('❌ Erro ao carregar produtos:', error);
+        alert('❌ Erro ao conectar com a API: ' + error.message);
+    }
+}
+
+// Inicializar quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Página carregada, inicializando...');
+    carregarProdutos();
+});
+
+// Backup - também tentar carregar no evento window.load
+window.addEventListener('load', function() {
+    console.log('🔄 Window load event, tentando carregar produtos...');
+    // Só carregar se container estiver vazio
+    const container = document.getElementById('products-container');
+    if (container && container.innerHTML.trim() === '') {
+        carregarProdutos();
+    }
+});
+
+// Resto do código de paginação e busca permanece igual
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const productsContainer = document.getElementById('products-container');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    
+    let productsPerPage = 9;
+    let currentlyShowing = 0;
+    let allProducts = [];
+    let filteredProducts = [];
+    let isSearching = false;
+    
+    // Função para mostrar produtos com paginação
+    function showProducts(products, append = false) {
+        if (!append) {
+            currentlyShowing = 0;
+        }
+        
+        let productsToShow = products.slice(0, currentlyShowing + productsPerPage);
+        currentlyShowing = productsToShow.length;
+        
+        // Esconder todos os produtos primeiro
+        document.querySelectorAll('.properties').forEach(product => {
+            product.style.display = 'none';
+        });
+        
+        // Mostrar apenas os produtos que devem aparecer
+        productsToShow.forEach(product => {
+            product.style.display = 'block';
+        });
+        
+        // Controlar visibilidade do botão "Ver Mais"
+        if (currentlyShowing >= products.length) {
+            loadMoreBtn.style.display = 'none';
+        } else {
+            loadMoreBtn.style.display = 'block';
+            loadMoreBtn.innerHTML = `<i class="fas fa-plus"></i> Ver Mais Produtos (${products.length - currentlyShowing} restantes)`;
         }
     }
-
-    // Chamada da função ao carregar a página
-    window.onload = carregarProdutos;
-
-
+    
+    // Função para carregar mais produtos
+    function loadMoreProducts() {
+        const products = isSearching ? filteredProducts : allProducts;
+        showProducts(products, true);
+    }
+    
+    // Função para filtrar produtos
+    function filterProducts(searchTerm) {
+        const products = document.querySelectorAll('.properties');
+        filteredProducts = [];
         
-            document.addEventListener('DOMContentLoaded', function() {
-                const searchInput = document.getElementById('searchInput');
-                const searchBtn = document.getElementById('searchBtn');
-                const productsContainer = document.getElementById('products-container');
-                const loadMoreBtn = document.getElementById('loadMoreBtn');
-                
-                let productsPerPage = 9; // Mostrar 9 produtos inicialmente
-                let currentlyShowing = 0;
-                let allProducts = [];
-                let filteredProducts = [];
-                let isSearching = false;
-                
-                // Função para mostrar produtos com paginação
-                function showProducts(products, append = false) {
-                    if (!append) {
-                        currentlyShowing = 0;
-                    }
-                    
-                    let productsToShow = products.slice(0, currentlyShowing + productsPerPage);
-                    currentlyShowing = productsToShow.length;
-                    
-                    // Esconder todos os produtos primeiro
-                    document.querySelectorAll('.properties').forEach(product => {
-                        product.style.display = 'none';
-                    });
-                    
-                    // Mostrar apenas os produtos que devem aparecer
-                    productsToShow.forEach(product => {
-                        product.style.display = 'block';
-                    });
-                    
-                    // Controlar visibilidade do botão "Ver Mais"
-                    if (currentlyShowing >= products.length) {
-                        loadMoreBtn.style.display = 'none';
-                    } else {
-                        loadMoreBtn.style.display = 'block';
-                        loadMoreBtn.innerHTML = `<i class="fas fa-plus"></i> Ver Mais Produtos (${products.length - currentlyShowing} restantes)`;
-                    }
-                }
-                
-                // Função para carregar mais produtos
-                function loadMoreProducts() {
-                    const products = isSearching ? filteredProducts : allProducts;
-                    showProducts(products, true);
-                }
-                
-                // Função para filtrar produtos (atualizada)
-                function filterProducts(searchTerm) {
-                    const products = document.querySelectorAll('.properties');
-                    filteredProducts = [];
-                    
-                    products.forEach(product => {
-                        const productName = product.querySelector('h3').textContent.toLowerCase();
-                        const productBrand = product.querySelector('.properties__caption p') ? 
-                                            product.querySelector('.properties__caption p').textContent.toLowerCase() : '';
-                        
-                        if (searchTerm === '' || 
-                            productName.includes(searchTerm.toLowerCase()) || 
-                            productBrand.includes(searchTerm.toLowerCase())) {
-                            filteredProducts.push(product);
-                        }
-                    });
-                    
-                    isSearching = searchTerm !== '';
-                    
-                    if (isSearching) {
-                        showProducts(filteredProducts);
-                        showNoResultsMessage(filteredProducts.length === 0);
-                    } else {
-                        showProducts(allProducts);
-                        showNoResultsMessage(false);
-                    }
-                }
-                
-                // Função para mostrar mensagem de "sem resultados"
-                function showNoResultsMessage(show) {
-                    let noResultsDiv = document.querySelector('.no-results');
-                    
-                    if (show && !noResultsDiv) {
-                        noResultsDiv = document.createElement('div');
-                        noResultsDiv.className = 'no-results';
-                        noResultsDiv.innerHTML = '<p>Nenhum produto encontrado com esse nome.</p>';
-                        productsContainer.appendChild(noResultsDiv);
-                    } else if (!show && noResultsDiv) {
-                        noResultsDiv.remove();
-                    }
-                }
-                
-                // Inicializar quando a página carregar
-                function initializeProducts() {
-                    const products = document.querySelectorAll('.properties');
-                    allProducts = Array.from(products);
-                    
-                    if (allProducts.length > 0) {
-                        showProducts(allProducts);
-                    }
-                }
-                
-                // Event listeners
-                loadMoreBtn.addEventListener('click', loadMoreProducts);
-                
-                searchBtn.addEventListener('click', function() {
-                    const searchTerm = searchInput.value.trim();
-                    filterProducts(searchTerm);
-                });
-                
-                searchInput.addEventListener('input', function() {
-                    const searchTerm = this.value.trim();
-                    filterProducts(searchTerm);
-                });
-                
-                searchInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        const searchTerm = this.value.trim();
-                           filterProducts(searchTerm);
-                    }  
-                });
-                
-                // Inicializar quando os produtos carregarem
-                // Você pode chamar esta função depois de carregar os produtos via AJAX
-                setTimeout(initializeProducts, 1000); // Aguardar 1 segundo para garantir que produtos carregaram
-            });
+        products.forEach(product => {
+            const productName = product.querySelector('h3').textContent.toLowerCase();
+            const productBrand = product.querySelector('.properties__caption p') ? 
+                                product.querySelector('.properties__caption p').textContent.toLowerCase() : '';
+            
+            if (searchTerm === '' || 
+                productName.includes(searchTerm.toLowerCase()) || 
+                productBrand.includes(searchTerm.toLowerCase())) {
+                filteredProducts.push(product);
+            }
+        });
+        
+        isSearching = searchTerm !== '';
+        
+        if (isSearching) {
+            showProducts(filteredProducts);
+            showNoResultsMessage(filteredProducts.length === 0);
+        } else {
+            showProducts(allProducts);
+            showNoResultsMessage(false);
+        }
+    }
+    
+    // Função para mostrar mensagem de "sem resultados"
+    function showNoResultsMessage(show) {
+        let noResultsDiv = document.querySelector('.no-results');
+        
+        if (show && !noResultsDiv) {
+            noResultsDiv = document.createElement('div');
+            noResultsDiv.className = 'no-results';
+            noResultsDiv.innerHTML = '<p>Nenhum produto encontrado com esse nome.</p>';
+            productsContainer.appendChild(noResultsDiv);
+        } else if (!show && noResultsDiv) {
+            noResultsDiv.remove();
+        }
+    }
+    
+    // Inicializar quando a página carregar
+    function initializeProducts() {
+        const products = document.querySelectorAll('.properties');
+        allProducts = Array.from(products);
+        
+        if (allProducts.length > 0) {
+            showProducts(allProducts);
+        }
+    }
+    
+    // Event listeners
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', loadMoreProducts);
+    }
+    
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function() {
+            const searchTerm = searchInput.value.trim();
+            filterProducts(searchTerm);
+        });
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            filterProducts(searchTerm);
+        });
+        
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = this.value.trim();
+                filterProducts(searchTerm);
+            }  
+        });
+    }
+    
+    // Inicializar quando os produtos carregarem
+    setTimeout(initializeProducts, 1000);
+    
+    // Tornar initializeProducts global para ser chamada de carregarProdutos
+    window.initializeProducts = initializeProducts;
+});
 
+             
 
 
         </script>
