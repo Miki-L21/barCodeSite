@@ -29,6 +29,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 break;
                 
+            case 'update_status_comprado':
+                if (isset($input['produto_user_id']) && isset($input['comprado'])) {
+                    $produtoUserId = $input['produto_user_id'];
+                    $statusComprado = $input['comprado'] === true || $input['comprado'] === 'true';
+                    $controller->updateStatusComprado($produtoUserId, $statusComprado);
+                    exit;
+                }
+                break;
+                
+            case 'clear_comprado_status':
+                $controller->clearCompradoStatus();
+                exit;
+                
+            case 'mark_all_purchased':
+                $controller->markAllAsPurchased();
+                exit;
+                
             case 'clear_all':
                 $controller->clearAllProdutosUser();
                 exit;

@@ -191,97 +191,97 @@ $user_id = $is_logged_in ? $_SESSION['user_id'] : null;
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Apenas busca os produtos se o utilizador estiver logado
-        <?php if ($is_logged_in): ?>
-            fetchProdutosUserLogado();
-        <?php else: ?>
-            displayCartItems();
-        <?php endif; ?>
-    });
+    // Apenas busca os produtos se o utilizador estiver logado
+    if (<?php echo $is_logged_in ? 'true' : 'false'; ?>) {
+        fetchProdutosUserLogado();
+    } else {
+        displayCartItems();
+    }
+});
 
-    function displayCartItems() {
-        const cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
-        const emptyCart = document.getElementById('empty-cart');
-        const cartItems = document.getElementById('cart-items');
-        const productsList = document.getElementById('products-list');
+function displayCartItems() {
+    const cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+    const emptyCart = document.getElementById('empty-cart');
+    const cartItems = document.getElementById('cart-items');
+    const productsList = document.getElementById('products-list');
 
-        if (cart.length === 0) {
-            emptyCart.style.display = 'block';
-            cartItems.style.display = 'none';
-            return;
-        }
+    if (cart.length === 0) {
+        emptyCart.style.display = 'block';
+        cartItems.style.display = 'none';
+        return;
+    }
 
-        emptyCart.style.display = 'none';
-        cartItems.style.display = 'block';
+    emptyCart.style.display = 'none';
+    cartItems.style.display = 'block';
 
-        let productsHTML = '';
-        let totalProducts = 0;
-        let totalPrice = 0;
-        let produtosGlobal = []; 
+    let productsHTML = '';
+    let totalProducts = 0;
+    let totalPrice = 0;
+    let produtosGlobal = []; 
 
-        cart.forEach((item, index) => {
-            const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.')) || 0;
-            const itemTotal = itemPrice * item.quantity;
-            totalProducts += item.quantity;
-            totalPrice += itemTotal;
+    cart.forEach((item, index) => {
+        const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.')) || 0;
+        const itemTotal = itemPrice * item.quantity;
+        totalProducts += item.quantity;
+        totalPrice += itemTotal;
 
-            productsHTML += `
-                <div class="product-item">
-                    <div class="row align-items-center">
-                        <div class="col-md-5">
-                            <div class="product-info">
-                                <h5>${item.name}</h5>
-                                <p class="product-brand mb-1">Marca: ${item.brand}</p>
-                                <small class="product-code">Código: ${item.barcode}</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <div class="quantity-controls">
-                                <button onclick="updateQuantity(${index}, -1)" class="quantity-btn">-</button>
-                                <div class="quantity-display">${item.quantity}</div>
-                                <button onclick="updateQuantity(${index}, 1)" class="quantity-btn">+</button>
-                            </div>
-                        </div>
-                        <div class="col-md-2 text-center">
-                            <button onclick="removeItem(${index})" class="btn btn-sm btn-outline-danger">
-                                <i class="fas fa-trash"></i>
-                            </button>
+        productsHTML += `
+            <div class="product-item">
+                <div class="row align-items-center">
+                    <div class="col-md-5">
+                        <div class="product-info">
+                            <h5>${item.name}</h5>
+                            <p class="product-brand mb-1">Marca: ${item.brand}</p>
+                            <small class="product-code">Código: ${item.barcode}</small>
                         </div>
                     </div>
+                    <div class="col-md-3 text-center">
+                        <div class="quantity-controls">
+                            <button onclick="updateQuantity(${index}, -1)" class="quantity-btn">-</button>
+                            <div class="quantity-display">${item.quantity}</div>
+                            <button onclick="updateQuantity(${index}, 1)" class="quantity-btn">+</button>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <button onclick="removeItem(${index})" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
-            `;
-        });
+            </div>
+        `;
+    });
 
-        productsList.innerHTML = productsHTML;
-        document.getElementById('total-products').textContent = totalProducts;
-        document.getElementById('total-amount').textContent = `€${totalPrice.toFixed(2)}`;
+    productsList.innerHTML = productsHTML;
+    document.getElementById('total-products').textContent = totalProducts;
+    document.getElementById('total-amount').textContent = `€${totalPrice.toFixed(2)}`;
+}
+
+function updateQuantity(index, change) {
+    let cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+    cart[index].quantity += change;
+    if (cart[index].quantity <= 0) cart.splice(index, 1);
+    localStorage.setItem('shopping_cart', JSON.stringify(cart));
+    displayCartItems();
+}
+
+function removeItem(index) {
+    let cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
+    cart.splice(index, 1);
+    localStorage.setItem('shopping_cart', JSON.stringify(cart));
+    displayCartItems();
+}
+
+async function clearCart() {
+    if (!confirm('Tem certeza que deseja limpar o carrinho? Isso removerá todos os produtos da base de dados.')) {
+        return;
     }
 
-    function updateQuantity(index, change) {
-        let cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
-        cart[index].quantity += change;
-        if (cart[index].quantity <= 0) cart.splice(index, 1);
-        localStorage.setItem('shopping_cart', JSON.stringify(cart));
-        displayCartItems();
-    }
+    try {
+        localStorage.removeItem('shopping_cart');
+        localStorage.removeItem('purchased_items');
 
-    function removeItem(index) {
-        let cart = JSON.parse(localStorage.getItem('shopping_cart') || '[]');
-        cart.splice(index, 1);
-        localStorage.setItem('shopping_cart', JSON.stringify(cart));
-        displayCartItems();
-    }
-
-    async function clearCart() {
-        if (!confirm('Tem certeza que deseja limpar o carrinho? Isso removerá todos os produtos da base de dados.')) {
-            return;
-        }
-
-        try {
-            localStorage.removeItem('shopping_cart');
-            localStorage.removeItem('purchased_items');
-
-            <?php if ($is_logged_in): ?>
+        if (<?php echo $is_logged_in ? 'true' : 'false'; ?>) {
             const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
                 method: 'POST',
                 headers: {
@@ -301,218 +301,274 @@ $user_id = $is_logged_in ? $_SESSION['user_id'] : null;
                 alert('Erro ao limpar carrinho na base de dados: ' + (result.message || 'Erro desconhecido'));
                 displayCartItems();
             }
-            <?php else: ?>
-            displayCartItems();
-            <?php endif; ?>
-
-        } catch (error) {
-            console.error('Erro ao limpar carrinho:', error);
-            alert('Erro ao conectar com a API para limpar o carrinho');
+        } else {
             displayCartItems();
         }
+
+    } catch (error) {
+        console.error('Erro ao limpar carrinho:', error);
+        alert('Erro ao conectar com a API para limpar o carrinho');
+        displayCartItems();
     }
+}
 
-    async function fetchProdutosUserLogado() {
-        try {
-            const response = await fetch('http://localhost/site/controller/apiProdutosUser.php');
-            const json = await response.json();
+async function fetchProdutosUserLogado() {
+    try {
+        const response = await fetch('http://localhost/site/controller/apiProdutosUser.php');
+        const json = await response.json();
 
-            console.log('Resposta da API:', json);
+        console.log('Resposta da API:', json);
 
-            if (!json.success) {
-                alert('Erro: ' + (json.message || 'Erro desconhecido'));
-                return;
-            }
+        if (!json.success) {
+            alert('Erro: ' + (json.message || 'Erro desconhecido'));
+            return;
+        }
 
-            const produtos = json.data.produtos;
-            produtosGlobal = produtos;
+        const produtos = json.data.produtos;
+        produtosGlobal = produtos;
 
-            if (produtos.length === 0) {
-                document.getElementById('empty-cart').style.display = 'block';
-                document.getElementById('cart-items').style.display = 'none';
-                return;
-            }
+        if (produtos.length === 0) {
+            document.getElementById('empty-cart').style.display = 'block';
+            document.getElementById('cart-items').style.display = 'none';
+            return;
+        }
 
-            document.getElementById('empty-cart').style.display = 'none';
-            document.getElementById('cart-items').style.display = 'block';
+        document.getElementById('empty-cart').style.display = 'none';
+        document.getElementById('cart-items').style.display = 'block';
 
-            const productsList = document.getElementById('products-list');
-            let html = '';
-            let totalProducts = 0;
-            let totalPrice = 0;
+        const productsList = document.getElementById('products-list');
+        let html = '';
+        let totalProducts = 0;
+        let totalPrice = 0;
 
-            const purchasedItems = JSON.parse(localStorage.getItem('purchased_items') || '{}');
+        produtos.forEach((item, index) => {
+            const preco = parseFloat(item.produto_preco.replace(',', '.')) || 0;
+            const quantidade = parseInt(item.quantidade) || 1;
+            totalProducts += quantidade;
 
-            produtos.forEach((item, index) => {
-                const preco = parseFloat(item.produto_preco.replace(',', '.')) || 0;
-                const quantidade = parseInt(item.quantidade) || 1;
-                totalProducts += quantidade;
+            // Usar o valor do campo 'comprado' da base de dados
+            const isPurchased = item.comprado === true || item.comprado === 't';
+            const purchasedClass = isPurchased ? 'purchased' : '';
+            const buttonClass = isPurchased ? 'btn-purchased' : 'btn-not-purchased';
+            const buttonText = isPurchased ? 'Comprado' : 'Não Comprado';
+            const buttonIcon = isPurchased ? 'fas fa-check' : 'fas fa-times';
 
-                const isPurchased = purchasedItems[item.produto_barcode] || false;
-                const purchasedClass = isPurchased ? 'purchased' : '';
-                const buttonClass = isPurchased ? 'btn-purchased' : 'btn-not-purchased';
-                const buttonText = isPurchased ? 'Comprado' : 'Não Comprado';
-                const buttonIcon = isPurchased ? 'fas fa-check' : 'fas fa-times';
-
-                html += `
-                    <div class="product-item ${purchasedClass}" id="product-${item.produto_barcode}">
-                        <div class="row align-items-center">
-                            <div class="col-lg-3 col-md-4 col-sm-12">
-                                <div class="product-info">
-                                    <h5>${item.produto_nome}</h5>
-                                    <p class="product-brand mb-1">Marca: ${item.produto_marca}</p>
-                                    <small class="product-code">Código: ${item.produto_barcode}</small>
-                                </div>
+            html += `
+                <div class="product-item ${purchasedClass}" id="product-${item.id}">
+                    <div class="row align-items-center">
+                        <div class="col-lg-3 col-md-4 col-sm-12">
+                            <div class="product-info">
+                                <h5>${item.produto_nome}</h5>
+                                <p class="product-brand mb-1">Marca: ${item.produto_marca}</p>
+                                <small class="product-code">Código: ${item.produto_barcode}</small>
                             </div>
-                            <div class="col-lg-2 col-md-2 col-sm-6 col-6 text-center">
-                                <div class="quantity-controls">
-                                    <button onclick="updateQuantidadeAPI(${item.id}, ${quantidade - 1})" 
-                                            class="quantity-btn" 
-                                            ${quantidade <= 1 ? 'disabled' : ''}>
-                                        -
-                                    </button>
-                                    <div class="quantity-display">${quantidade}</div>
-                                    <button onclick="updateQuantidadeAPI(${item.id}, ${quantidade + 1})" 
-                                            class="quantity-btn">
-                                        +
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="col-lg-1 col-md-1 col-sm-6 col-6 text-center">
-                                <button onclick="removeProductFromAPI(${item.id}, '${item.produto_barcode}')" 
-                                        class="btn btn-sm btn-outline-danger" 
-                                        title="Remover produto">
-                                    <i class="fas fa-trash"></i>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-6 col-6 text-center">
+                            <div class="quantity-controls">
+                                <button onclick="updateQuantidadeAPI(${item.id}, ${quantidade - 1})" 
+                                        class="quantity-btn" 
+                                        ${quantidade <= 1 ? 'disabled' : ''}>
+                                    -
                                 </button>
-                            </div>
-                            <div class="col-lg-2 col-md-1 col-sm-6 col-6 text-center">
-                                <button onclick="togglePurchased('${item.produto_barcode}')" 
-                                        class="btn purchase-toggle ${buttonClass}" 
-                                        id="btn-${item.produto_barcode}">
-                                    <i class="${buttonIcon}"></i>
+                                <div class="quantity-display">${quantidade}</div>
+                                <button onclick="updateQuantidadeAPI(${item.id}, ${quantidade + 1})" 
+                                        class="quantity-btn">
+                                    +
                                 </button>
                             </div>
                         </div>
+                        <div class="col-lg-1 col-md-1 col-sm-6 col-6 text-center">
+                            <button onclick="removeProductFromAPI(${item.id})" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    title="Remover produto">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="col-lg-2 col-md-1 col-sm-6 col-6 text-center">
+                            <button onclick="togglePurchasedAPI(${item.id})" 
+                                    class="btn purchase-toggle ${buttonClass}" 
+                                    id="btn-${item.id}">
+                                <i class="${buttonIcon}"></i>
+                            </button>
+                        </div>
                     </div>
-                `;
-            });
-
-            productsList.innerHTML = html;
-            document.getElementById('total-products').textContent = totalProducts;
-        } catch (err) {
-            console.error('Erro ao buscar produtos:', err);
-            alert('Erro ao conectar com a API');
-        }
-    }
-
-    // Função para atualizar quantidade via API
-    async function updateQuantidadeAPI(produtoUserId, novaQuantidade) {
-        if (novaQuantidade < 0) return;
-
-        try {
-            const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'update_quantity',
-                    produto_user_id: produtoUserId,
-                    quantidade: novaQuantidade
-                })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                fetchProdutosUserLogado(); // Recarregar a lista
-            } else {
-                alert('Erro ao atualizar quantidade: ' + (result.message || 'Erro desconhecido'));
-            }
-        } catch (error) {
-            console.error('Erro ao atualizar quantidade:', error);
-            alert('Erro ao conectar com a API para atualizar a quantidade');
-        }
-    }
-
-    async function removeProductFromAPI(produtoUserId, barcode) {
-        if (!confirm('Tem certeza que deseja remover este produto do carrinho?')) {
-            return;
-        }
-
-        try {
-            const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'remove',
-                    produto_user_id: produtoUserId
-                })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                const purchasedItems = JSON.parse(localStorage.getItem('purchased_items') || '{}');
-                delete purchasedItems[barcode];
-                localStorage.setItem('purchased_items', JSON.stringify(purchasedItems));
-
-                fetchProdutosUserLogado();
-                console.log('Produto removido com sucesso!');
-            } else {
-                alert('Erro ao remover produto: ' + (result.message || 'Erro desconhecido'));
-            }
-        } catch (error) {
-            console.error('Erro ao remover produto:', error);
-            alert('Erro ao conectar com a API para remover o produto');
-        }
-    }
-
-    function togglePurchased(barcode) {
-        const productElement = document.getElementById(`product-${barcode}`);
-        const buttonElement = document.getElementById(`btn-${barcode}`);
-        
-        if (!productElement || !buttonElement) {
-            console.error('Elementos não encontrados:', barcode);
-            return;
-        }
-        
-        const purchasedItems = JSON.parse(localStorage.getItem('purchased_items') || '{}');
-        const isPurchased = purchasedItems[barcode] || false;
-        
-        purchasedItems[barcode] = !isPurchased;
-        localStorage.setItem('purchased_items', JSON.stringify(purchasedItems));
-        
-        if (!isPurchased) {
-            productElement.classList.add('purchased');
-            buttonElement.className = 'btn purchase-toggle btn-purchased';
-            buttonElement.innerHTML = '<i class="fas fa-check"></i>';
-        } else {
-            productElement.classList.remove('purchased');
-            buttonElement.className = 'btn purchase-toggle btn-not-purchased';
-            buttonElement.innerHTML = '<i class="fas fa-times"></i>';
-        }
-        
-        console.log('Estado alterado para:', barcode, !isPurchased);
-    }
-
-    function clearPurchasedStatus() {
-        if (confirm('Deseja limpar o estado de todos os produtos comprados?')) {
-            localStorage.removeItem('purchased_items');
-            fetchProdutosUserLogado();
-        }
-    }
-
-    function markAllAsPurchased() {
-    if (confirm('Deseja marcar todos os produtos como comprados?')) {
-        const purchasedItems = {};
-        produtosGlobal.forEach(prod => {
-            purchasedItems[prod.produto_barcode] = true;
+                </div>
+            `;
         });
-        localStorage.setItem('purchased_items', JSON.stringify(purchasedItems));
-        fetchProdutosUserLogado();
+
+        productsList.innerHTML = html;
+        document.getElementById('total-products').textContent = totalProducts;
+    } catch (err) {
+        console.error('Erro ao buscar produtos:', err);
+        alert('Erro ao conectar com a API');
+    }
+}
+
+// Função para atualizar quantidade via API
+async function updateQuantidadeAPI(produtoUserId, novaQuantidade) {
+    if (novaQuantidade < 0) return;
+
+    try {
+        const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'update_quantity',
+                produto_user_id: produtoUserId,
+                quantidade: novaQuantidade
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            fetchProdutosUserLogado(); // Recarregar a lista
+        } else {
+            alert('Erro ao atualizar quantidade: ' + (result.message || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar quantidade:', error);
+        alert('Erro ao conectar com a API para atualizar a quantidade');
+    }
+}
+
+async function removeProductFromAPI(produtoUserId) {
+    if (!confirm('Tem certeza que deseja remover este produto do carrinho?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'remove',
+                produto_user_id: produtoUserId
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            fetchProdutosUserLogado();
+            console.log('Produto removido com sucesso!');
+        } else {
+            alert('Erro ao remover produto: ' + (result.message || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        console.error('Erro ao remover produto:', error);
+        alert('Erro ao conectar com a API para remover o produto');
+    }
+}
+
+// Nova função para atualizar status comprado via API
+async function togglePurchasedAPI(produtoUserId) {
+    try {
+        // Primeiro, obter o status atual
+        const productElement = document.getElementById(`product-${produtoUserId}`);
+        const isPurchased = productElement.classList.contains('purchased');
+        
+        const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'update_status_comprado',
+                produto_user_id: produtoUserId,
+                comprado: !isPurchased
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Atualizar a interface imediatamente
+            const buttonElement = document.getElementById(`btn-${produtoUserId}`);
+            
+            if (!isPurchased) {
+                productElement.classList.add('purchased');
+                buttonElement.className = 'btn purchase-toggle btn-purchased';
+                buttonElement.innerHTML = '<i class="fas fa-check"></i>';
+            } else {
+                productElement.classList.remove('purchased');
+                buttonElement.className = 'btn purchase-toggle btn-not-purchased';
+                buttonElement.innerHTML = '<i class="fas fa-times"></i>';
+            }
+            
+            console.log('Status comprado atualizado com sucesso!');
+        } else {
+            alert('Erro ao atualizar status comprado: ' + (result.message || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar status comprado:', error);
+        alert('Erro ao conectar com a API para atualizar o status comprado');
+    }
+}
+
+// Função para limpar status comprado de todos os produtos
+async function clearPurchasedStatus() {
+    if (!confirm('Deseja limpar o estado de todos os produtos comprados?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'clear_comprado_status'
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            fetchProdutosUserLogado(); // Recarregar a lista
+            console.log('Status comprado limpo para todos os produtos!');
+        } else {
+            alert('Erro ao limpar status comprado: ' + (result.message || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        console.error('Erro ao limpar status comprado:', error);
+        alert('Erro ao conectar com a API para limpar o status comprado');
+    }
+}
+
+// Função para marcar todos os produtos como comprados
+async function markAllAsPurchased() {
+    if (!confirm('Deseja marcar todos os produtos como comprados?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'mark_all_purchased'
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            fetchProdutosUserLogado(); // Recarregar a lista
+            console.log('Todos os produtos marcados como comprados!');
+        } else {
+            alert('Erro ao marcar todos como comprados: ' + (result.message || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        console.error('Erro ao marcar todos como comprados:', error);
+        alert('Erro ao conectar com a API para marcar todos como comprados');
     }
 }
     </script>

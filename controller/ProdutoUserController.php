@@ -35,6 +35,7 @@ class ProdutoUserController {
                     pu.id_produto,
                     pu.id_user,
                     pu.quantidade,
+                    pu.comprado,
                     p.nome AS produto_nome,
                     p.marca AS produto_marca,
                     p.categoria AS produto_categoria,
@@ -109,6 +110,85 @@ class ProdutoUserController {
 
         } catch (PDOException $e) {
             $this->sendResponse(false, 'Erro ao atualizar quantidade: ' . $e->getMessage());
+        }
+    }
+
+    public function updateStatusComprado($produtoUserId, $statusComprado) {
+        if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in'] || !isset($_SESSION['user_id'])) {
+            $this->sendResponse(false, 'Utilizador não está logado');
+            return;
+        }
+
+        try {
+            $userId = $_SESSION['user_id'];
+
+            // Verificar se o produto pertence ao utilizador
+            $stmt = $this->pdo->prepare("SELECT id FROM produto_user WHERE id = ? AND id_user = ?");
+            $stmt->execute([$produtoUserId, $userId]);
+
+            if (!$stmt->fetch()) {
+                $this->sendResponse(false, 'Produto não encontrado ou não pertence ao utilizador');
+                return;
+            }
+
+            // Atualizar o status comprado
+            $stmt = $this->pdo->prepare("UPDATE produto_user SET comprado = ? WHERE id = ? AND id_user = ?");
+            $stmt->execute([$statusComprado, $produtoUserId, $userId]);
+
+            if ($stmt->rowCount() > 0) {
+                $this->sendResponse(true, 'Status comprado atualizado com sucesso', [
+                    'novo_status' => $statusComprado
+                ]);
+            } else {
+                $this->sendResponse(false, 'Erro ao atualizar status comprado');
+            }
+
+        } catch (PDOException $e) {
+            $this->sendResponse(false, 'Erro ao atualizar status comprado: ' . $e->getMessage());
+        }
+    }
+
+    public function clearCompradoStatus() {
+        if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in'] || !isset($_SESSION['user_id'])) {
+            $this->sendResponse(false, 'Utilizador não está logado');
+            return;
+        }
+
+        try {
+            $userId = $_SESSION['user_id'];
+
+            // Limpar o status comprado de todos os produtos do utilizador
+            $stmt = $this->pdo->prepare("UPDATE produto_user SET comprado = false WHERE id_user = ?");
+            $stmt->execute([$userId]);
+
+            $this->sendResponse(true, 'Status comprado limpo para todos os produtos', [
+                'updated_count' => $stmt->rowCount()
+            ]);
+
+        } catch (PDOException $e) {
+            $this->sendResponse(false, 'Erro ao limpar status comprado: ' . $e->getMessage());
+        }
+    }
+
+    public function markAllAsPurchased() {
+        if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in'] || !isset($_SESSION['user_id'])) {
+            $this->sendResponse(false, 'Utilizador não está logado');
+            return;
+        }
+
+        try {
+            $userId = $_SESSION['user_id'];
+
+            // Marcar todos os produtos como comprados
+            $stmt = $this->pdo->prepare("UPDATE produto_user SET comprado = true WHERE id_user = ?");
+            $stmt->execute([$userId]);
+
+            $this->sendResponse(true, 'Todos os produtos marcados como comprados', [
+                'updated_count' => $stmt->rowCount()
+            ]);
+
+        } catch (PDOException $e) {
+            $this->sendResponse(false, 'Erro ao marcar todos como comprados: ' . $e->getMessage());
         }
     }
 
