@@ -131,9 +131,15 @@ class ProdutoUserController {
                 return;
             }
 
-            // Atualizar o status comprado
+            // Garantir que $statusComprado seja booleano
+            $statusComprado = ($statusComprado) ? true : false;
+
+            // Atualizar o status comprado usando bindValue com PDO::PARAM_BOOL
             $stmt = $this->pdo->prepare("UPDATE produto_user SET comprado = ? WHERE id = ? AND id_user = ?");
-            $stmt->execute([$statusComprado, $produtoUserId, $userId]);
+            $stmt->bindValue(1, $statusComprado, PDO::PARAM_BOOL);
+            $stmt->bindValue(2, $produtoUserId, PDO::PARAM_INT);
+            $stmt->bindValue(3, $userId, PDO::PARAM_INT);
+            $stmt->execute();
 
             if ($stmt->rowCount() > 0) {
                 $this->sendResponse(true, 'Status comprado atualizado com sucesso', [
@@ -147,6 +153,7 @@ class ProdutoUserController {
             $this->sendResponse(false, 'Erro ao atualizar status comprado: ' . $e->getMessage());
         }
     }
+
 
     public function clearCompradoStatus() {
         if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in'] || !isset($_SESSION['user_id'])) {

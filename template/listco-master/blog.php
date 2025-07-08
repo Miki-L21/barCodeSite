@@ -141,7 +141,7 @@ $user_id = $is_logged_in ? $_SESSION['user_id'] : null;
                                     <div class="row">
                                         <div class="col-md-8">
                                             <div class="cart-actions">
-                                                <a href="barcode.php" class="btn btn-outline-primary">
+                                                <a href="barcode.php" class="btn">
                                                     <i class="fas fa-plus"></i> Adicionar Mais Produtos
                                                 </a>
                                             </div>
@@ -379,7 +379,7 @@ async function fetchProdutosUserLogado() {
                         </div>
                         <div class="col-lg-1 col-md-1 col-sm-6 col-6 text-center">
                             <button onclick="removeProductFromAPI(${item.id})" 
-                                    class="btn btn-sm btn-outline-danger" 
+                                    class="btn btn-sm " 
                                     title="Remover produto">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -471,6 +471,8 @@ async function togglePurchasedAPI(produtoUserId) {
         // Primeiro, obter o status atual
         const productElement = document.getElementById(`product-${produtoUserId}`);
         const isPurchased = productElement.classList.contains('purchased');
+
+        console.log('Enviando status comprado:', !isPurchased);
         
         const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
             method: 'POST',
