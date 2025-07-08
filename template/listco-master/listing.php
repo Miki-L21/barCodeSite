@@ -359,7 +359,7 @@ $user_email = $is_logged_in ? $_SESSION['user_email'] : '';
         console.log('📥 Resposta recebida:', result);
         
         if (result.success) {
-            alert('✅ Produto adicionado com sucesso!');
+            //alert('✅ Produto adicionado com sucesso!');
             updateButtonState(produtoIdNum, true);
         } else {
             alert('❌ Erro: ' + (result.message || 'Erro desconhecido'));

@@ -10,10 +10,33 @@ $controller = new ProdutoUserController($config);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     
-    if (isset($input['action']) && $input['action'] === 'remove' && isset($input['produto_user_id'])) {
-        $produtoUserId = $input['produto_user_id'];
-        $controller->removeProdutoUserLogado($produtoUserId);
-        exit;
+    if (isset($input['action'])) {
+        switch ($input['action']) {
+            case 'remove':
+                if (isset($input['produto_user_id'])) {
+                    $produtoUserId = $input['produto_user_id'];
+                    $controller->removeProdutoUserLogado($produtoUserId);
+                    exit;
+                }
+                break;
+                
+            case 'update_quantity':
+                if (isset($input['produto_user_id']) && isset($input['quantidade'])) {
+                    $produtoUserId = $input['produto_user_id'];
+                    $quantidade = intval($input['quantidade']);
+                    $controller->updateQuantidade($produtoUserId, $quantidade);
+                    exit;
+                }
+                break;
+                
+            case 'clear_all':
+                $controller->clearAllProdutosUser();
+                exit;
+                
+            default:
+                echo json_encode(['success' => false, 'message' => 'Ação não reconhecida']);
+                exit;
+        }
     }
 }
 

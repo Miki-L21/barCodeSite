@@ -20,7 +20,6 @@ class ProdutoUserController {
         }
     }
 
-
     public function getProdutosUserLogado() {
         if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in'] || !isset($_SESSION['user_id'])) {
             $this->sendResponse(false, 'Utilizador não está logado');
@@ -35,6 +34,7 @@ class ProdutoUserController {
                     pu.id,
                     pu.id_produto,
                     pu.id_user,
+                    pu.quantidade,
                     p.nome AS produto_nome,
                     p.marca AS produto_marca,
                     p.categoria AS produto_categoria,
@@ -61,6 +61,54 @@ class ProdutoUserController {
 
         } catch (PDOException $e) {
             $this->sendResponse(false, 'Erro ao carregar produtos: ' . $e->getMessage());
+        }
+    }
+
+    public function updateQuantidade($produtoUserId, $novaQuantidade) {
+        if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in'] || !isset($_SESSION['user_id'])) {
+            $this->sendResponse(false, 'Utilizador não está logado');
+            return;
+        }
+
+        try {
+            $userId = $_SESSION['user_id'];
+
+            // Verificar se o produto pertence ao utilizador
+            $stmt = $this->pdo->prepare("SELECT id FROM produto_user WHERE id = ? AND id_user = ?");
+            $stmt->execute([$produtoUserId, $userId]);
+
+            if (!$stmt->fetch()) {
+                $this->sendResponse(false, 'Produto não encontrado ou não pertence ao utilizador');
+                return;
+            }
+
+            // Se a quantidade for 0 ou menor, remover o produto
+            if ($novaQuantidade <= 0) {
+                $stmt = $this->pdo->prepare("DELETE FROM produto_user WHERE id = ? AND id_user = ?");
+                $stmt->execute([$produtoUserId, $userId]);
+                
+                if ($stmt->rowCount() > 0) {
+                    $this->sendResponse(true, 'Produto removido (quantidade chegou a 0)');
+                } else {
+                    $this->sendResponse(false, 'Erro ao remover produto');
+                }
+                return;
+            }
+
+            // Atualizar a quantidade
+            $stmt = $this->pdo->prepare("UPDATE produto_user SET quantidade = ? WHERE id = ? AND id_user = ?");
+            $stmt->execute([$novaQuantidade, $produtoUserId, $userId]);
+
+            if ($stmt->rowCount() > 0) {
+                $this->sendResponse(true, 'Quantidade atualizada com sucesso', [
+                    'nova_quantidade' => $novaQuantidade
+                ]);
+            } else {
+                $this->sendResponse(false, 'Erro ao atualizar quantidade');
+            }
+
+        } catch (PDOException $e) {
+            $this->sendResponse(false, 'Erro ao atualizar quantidade: ' . $e->getMessage());
         }
     }
 
@@ -121,5 +169,31 @@ class ProdutoUserController {
         }
 
         echo json_encode($response);
+    }
+
+    public function clearAllProdutosUser() {
+        if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in'] || !isset($_SESSION['user_id'])) {
+            $this->sendResponse(false, 'Utilizador não está logado');
+            return;
+        }
+
+        try {
+            $userId = $_SESSION['user_id'];
+
+            // Remover todos os produtos do utilizador logado
+            $stmt = $this->pdo->prepare("DELETE FROM produto_user WHERE id_user = ?");
+            $stmt->execute([$userId]);
+
+            if ($stmt->rowCount() > 0) {
+                $this->sendResponse(true, 'Todos os produtos foram removidos do carrinho com sucesso', [
+                    'removed_count' => $stmt->rowCount()
+                ]);
+            } else {
+                $this->sendResponse(true, 'Carrinho já estava vazio');
+            }
+
+        } catch (PDOException $e) {
+            $this->sendResponse(false, 'Erro ao limpar carrinho: ' . $e->getMessage());
+        }
     }
 }

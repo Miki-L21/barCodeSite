@@ -123,10 +123,10 @@ $user_id = $is_logged_in ? $_SESSION['user_id'] : null;
                                         </div>
                                         <div class="col-md-6 text-md-right text-center">
                                             <button onclick="clearPurchasedStatus()" class="btn btn-outline-warning">
-                                                <i class="fas fa-undo"></i> Limpar Comprados
+                                                <i class="bi bi-clipboard-x-fill"></i> Limpar Comprados
                                             </button>
-                                            <button onclick="clearCart()" class="btn btn-outline-danger ml-2">
-                                                <i class="fas fa-trash"></i> Limpar Carrinho
+                                            <button onclick="markAllAsPurchased()" class="btn btn-outline-danger ml-2">
+                                                <i class="bi bi-clipboard-check-fill"></i> Tudo comprado
                                             </button>
                                         </div>
                                     </div>
@@ -135,8 +135,7 @@ $user_id = $is_logged_in ? $_SESSION['user_id'] : null;
                                 <div class="cart-summary mt-4">
                                     <div class="row mt-3">
                                         <div class="col text-right">
-                                            <p>Subtotal: <strong id="subtotal">€0.00</strong></p>
-                                            <p>Total: <strong id="total-amount">€0.00</strong></p>
+                                            <p>Total de Produtos: <strong id="total-products">0</strong></p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -158,11 +157,6 @@ $user_id = $is_logged_in ? $_SESSION['user_id'] : null;
     </main>
 
     <?php include("rodape.php"); ?>
-
-    <?php
-var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
-?>
-
 
     <div id="back-top">
         <a title="Go to Top" href="#"> <i class="fas fa-level-up-alt"></i></a>
@@ -197,7 +191,12 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        displayCartItems();
+        // Apenas busca os produtos se o utilizador estiver logado
+        <?php if ($is_logged_in): ?>
+            fetchProdutosUserLogado();
+        <?php else: ?>
+            displayCartItems();
+        <?php endif; ?>
     });
 
     function displayCartItems() {
@@ -216,12 +215,15 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
         cartItems.style.display = 'block';
 
         let productsHTML = '';
-        let total = 0;
+        let totalProducts = 0;
+        let totalPrice = 0;
+        let produtosGlobal = []; 
 
         cart.forEach((item, index) => {
             const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.')) || 0;
             const itemTotal = itemPrice * item.quantity;
-            total += itemTotal;
+            totalProducts += item.quantity;
+            totalPrice += itemTotal;
 
             productsHTML += `
                 <div class="product-item">
@@ -233,22 +235,14 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
                                 <small class="product-code">Código: ${item.barcode}</small>
                             </div>
                         </div>
-                        <div class="col-md-2 text-center">
-                            <div class="product-price">${item.price}</div>
-                        </div>
                         <div class="col-md-3 text-center">
                             <div class="quantity-controls">
-                                <button onclick="updateQuantity(${index}, -1)" class="btn btn-sm btn-outline-secondary">
-                                    <i class="fas fa-minus"></i>
-                                </button>
+                                <button onclick="updateQuantity(${index}, -1)" class="quantity-btn">-</button>
                                 <div class="quantity-display">${item.quantity}</div>
-                                <button onclick="updateQuantity(${index}, 1)" class="btn btn-sm btn-outline-secondary">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+                                <button onclick="updateQuantity(${index}, 1)" class="quantity-btn">+</button>
                             </div>
                         </div>
                         <div class="col-md-2 text-center">
-                            <div class="item-total mb-2">€${itemTotal.toFixed(2)}</div>
                             <button onclick="removeItem(${index})" class="btn btn-sm btn-outline-danger">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -259,8 +253,8 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
         });
 
         productsList.innerHTML = productsHTML;
-        document.getElementById('subtotal').textContent = `€${total.toFixed(2)}`;
-        document.getElementById('total-amount').textContent = `€${total.toFixed(2)}`;
+        document.getElementById('total-products').textContent = totalProducts;
+        document.getElementById('total-amount').textContent = `€${totalPrice.toFixed(2)}`;
     }
 
     function updateQuantity(index, change) {
@@ -278,25 +272,46 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
         displayCartItems();
     }
 
-    function clearCart() {
-        if (confirm('Tem certeza que deseja limpar o carrinho?')) {
+    async function clearCart() {
+        if (!confirm('Tem certeza que deseja limpar o carrinho? Isso removerá todos os produtos da base de dados.')) {
+            return;
+        }
+
+        try {
             localStorage.removeItem('shopping_cart');
+            localStorage.removeItem('purchased_items');
+
+            <?php if ($is_logged_in): ?>
+            const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'clear_all'
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                console.log('Todos os produtos foram removidos da base de dados!');
+                fetchProdutosUserLogado();
+            } else {
+                alert('Erro ao limpar carrinho na base de dados: ' + (result.message || 'Erro desconhecido'));
+                displayCartItems();
+            }
+            <?php else: ?>
+            displayCartItems();
+            <?php endif; ?>
+
+        } catch (error) {
+            console.error('Erro ao limpar carrinho:', error);
+            alert('Erro ao conectar com a API para limpar o carrinho');
             displayCartItems();
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-    displayCartItems();
-
-    // Apenas busca os produtos se o utilizador estiver logado
-    <?php if ($is_logged_in): ?>
-        fetchProdutosUserLogado();
-    <?php endif; ?>
-});
-
-
-    // Função comentada até que seja usada corretamente
-    
     async function fetchProdutosUserLogado() {
         try {
             const response = await fetch('http://localhost/site/controller/apiProdutosUser.php');
@@ -310,6 +325,7 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
             }
 
             const produtos = json.data.produtos;
+            produtosGlobal = produtos;
 
             if (produtos.length === 0) {
                 document.getElementById('empty-cart').style.display = 'block';
@@ -322,16 +338,15 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
 
             const productsList = document.getElementById('products-list');
             let html = '';
-            let total = 0;
+            let totalProducts = 0;
+            let totalPrice = 0;
 
-            // Recuperar estado dos produtos comprados do localStorage
             const purchasedItems = JSON.parse(localStorage.getItem('purchased_items') || '{}');
 
             produtos.forEach((item, index) => {
                 const preco = parseFloat(item.produto_preco.replace(',', '.')) || 0;
-                const quantidade = 1;
-                const subtotal = preco * quantidade;
-                total += subtotal;
+                const quantidade = parseInt(item.quantidade) || 1;
+                totalProducts += quantidade;
 
                 const isPurchased = purchasedItems[item.produto_barcode] || false;
                 const purchasedClass = isPurchased ? 'purchased' : '';
@@ -342,7 +357,7 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
                 html += `
                     <div class="product-item ${purchasedClass}" id="product-${item.produto_barcode}">
                         <div class="row align-items-center">
-                            <div class="col-lg-4 col-md-5 col-sm-12">
+                            <div class="col-lg-3 col-md-4 col-sm-12">
                                 <div class="product-info">
                                     <h5>${item.produto_nome}</h5>
                                     <p class="product-brand mb-1">Marca: ${item.produto_marca}</p>
@@ -350,7 +365,18 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
                                 </div>
                             </div>
                             <div class="col-lg-2 col-md-2 col-sm-6 col-6 text-center">
-                                <div class="product-price">€${preco.toFixed(2)}</div>
+                                <div class="quantity-controls">
+                                    <button onclick="updateQuantidadeAPI(${item.id}, ${quantidade - 1})" 
+                                            class="quantity-btn" 
+                                            ${quantidade <= 1 ? 'disabled' : ''}>
+                                        -
+                                    </button>
+                                    <div class="quantity-display">${quantidade}</div>
+                                    <button onclick="updateQuantidadeAPI(${item.id}, ${quantidade + 1})" 
+                                            class="quantity-btn">
+                                        +
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-lg-1 col-md-1 col-sm-6 col-6 text-center">
                                 <button onclick="removeProductFromAPI(${item.id}, '${item.produto_barcode}')" 
@@ -359,14 +385,11 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
-                            <div class="col-lg-2 col-md-2 col-sm-6 col-6 text-center">
-                                <div class="item-total mb-2">€${subtotal.toFixed(2)}</div>
-                            </div>
-                            <div class="col-lg-3 col-md-2 col-sm-6 col-6 text-center">
+                            <div class="col-lg-2 col-md-1 col-sm-6 col-6 text-center">
                                 <button onclick="togglePurchased('${item.produto_barcode}')" 
                                         class="btn purchase-toggle ${buttonClass}" 
                                         id="btn-${item.produto_barcode}">
-                                    <i class="${buttonIcon}"></i> ${buttonText}
+                                    <i class="${buttonIcon}"></i>
                                 </button>
                             </div>
                         </div>
@@ -375,22 +398,49 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
             });
 
             productsList.innerHTML = html;
-            document.getElementById('subtotal').textContent = `€${total.toFixed(2)}`;
-            document.getElementById('total-amount').textContent = `€${total.toFixed(2)}`;
+            document.getElementById('total-products').textContent = totalProducts;
         } catch (err) {
             console.error('Erro ao buscar produtos:', err);
             alert('Erro ao conectar com a API');
         }
     }
 
-    // Nova função para remover produto individual da API
+    // Função para atualizar quantidade via API
+    async function updateQuantidadeAPI(produtoUserId, novaQuantidade) {
+        if (novaQuantidade < 0) return;
+
+        try {
+            const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'update_quantity',
+                    produto_user_id: produtoUserId,
+                    quantidade: novaQuantidade
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                fetchProdutosUserLogado(); // Recarregar a lista
+            } else {
+                alert('Erro ao atualizar quantidade: ' + (result.message || 'Erro desconhecido'));
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar quantidade:', error);
+            alert('Erro ao conectar com a API para atualizar a quantidade');
+        }
+    }
+
     async function removeProductFromAPI(produtoUserId, barcode) {
         if (!confirm('Tem certeza que deseja remover este produto do carrinho?')) {
             return;
         }
 
         try {
-            // Fazer chamada para a API usando o endpoint correto
             const response = await fetch('http://localhost/site/controller/apiProdutosUser.php', {
                 method: 'POST',
                 headers: {
@@ -405,15 +455,11 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
             const result = await response.json();
 
             if (result.success) {
-                // Remover também do localStorage de produtos comprados
                 const purchasedItems = JSON.parse(localStorage.getItem('purchased_items') || '{}');
                 delete purchasedItems[barcode];
                 localStorage.setItem('purchased_items', JSON.stringify(purchasedItems));
 
-                // Recarregar a lista de produtos
                 fetchProdutosUserLogado();
-                
-                // Opcional: mostrar mensagem de sucesso
                 console.log('Produto removido com sucesso!');
             } else {
                 alert('Erro ao remover produto: ' + (result.message || 'Erro desconhecido'));
@@ -424,7 +470,6 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
         }
     }
 
-
     function togglePurchased(barcode) {
         const productElement = document.getElementById(`product-${barcode}`);
         const buttonElement = document.getElementById(`btn-${barcode}`);
@@ -434,42 +479,42 @@ var_dump($_SESSION['user_id']); // deve mostrar algo como int(5)
             return;
         }
         
-        // Recuperar estado atual
         const purchasedItems = JSON.parse(localStorage.getItem('purchased_items') || '{}');
         const isPurchased = purchasedItems[barcode] || false;
         
-        // Alternar estado
         purchasedItems[barcode] = !isPurchased;
         localStorage.setItem('purchased_items', JSON.stringify(purchasedItems));
         
-        // Atualizar visual
         if (!isPurchased) {
-            // Marcar como comprado
             productElement.classList.add('purchased');
             buttonElement.className = 'btn purchase-toggle btn-purchased';
-            buttonElement.innerHTML = '<i class="fas fa-check"></i><span>Comprado</span>';
+            buttonElement.innerHTML = '<i class="fas fa-check"></i>';
         } else {
-            // Desmarcar como comprado
             productElement.classList.remove('purchased');
             buttonElement.className = 'btn purchase-toggle btn-not-purchased';
-            buttonElement.innerHTML = '<i class="fas fa-times"></i><span>Não Comprado</span>';
+            buttonElement.innerHTML = '<i class="fas fa-times"></i>';
         }
         
         console.log('Estado alterado para:', barcode, !isPurchased);
     }
 
-
-
-
     function clearPurchasedStatus() {
         if (confirm('Deseja limpar o estado de todos os produtos comprados?')) {
             localStorage.removeItem('purchased_items');
-            fetchProdutosUserLogado(); // Recarregar a lista
+            fetchProdutosUserLogado();
         }
     }
 
-
-    
+    function markAllAsPurchased() {
+    if (confirm('Deseja marcar todos os produtos como comprados?')) {
+        const purchasedItems = {};
+        produtosGlobal.forEach(prod => {
+            purchasedItems[prod.produto_barcode] = true;
+        });
+        localStorage.setItem('purchased_items', JSON.stringify(purchasedItems));
+        fetchProdutosUserLogado();
+    }
+}
     </script>
 </body>
 </html>
